@@ -6,5 +6,6 @@ Todoist Scheduler is a simple script that handles one-time and recurring tasks i
 - PyTodoist https://github.com/Garee/pytodoist
 
 Install the dependencies:
-.. code-block:: bash
+```bash
     $ pip install pytodoist python-dateutil
+```
