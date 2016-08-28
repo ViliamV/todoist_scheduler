@@ -8,7 +8,7 @@ import argparse
 import pickle
 
 parser = argparse.ArgumentParser(description='''Todoist Scheduler can store future one-time or recurring tasks for Todoist \n
-                                                in plaintext and create a task in Todoist when they are needed. \n
+                                                in plain text and create a task in Todoist when they are needed. \n
                                                 Also offers more features regarding a set of repeating tasks.''')
 parser.add_argument('-f', dest='frontload', type=int, default=0,
                         help='Useful when you are going to be away from computer for X days. Use X as a parameter.')
