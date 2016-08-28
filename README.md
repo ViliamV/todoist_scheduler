@@ -13,7 +13,7 @@ Todoist Scheduler is a simple script that handles one-time and recurring tasks i
 2. Download `*.py` files:
 ```bash
     $ git clone https://github.com/ViliamV/todoist_scheduler.git
-    $ cd todoist_scheduler
+    $ cd todoist_scheduler/
 ```
 3. Run `todoist_scheduler.py --first` with parameter and follow the instructions:
 ```bash
