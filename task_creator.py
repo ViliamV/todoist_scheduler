@@ -11,9 +11,8 @@ with open(directory + '/python_todoist.conf') as conf:
             one_time_dir = line[2:].strip()
         elif line[0] == 'R':
             recurring_dir = line[2:].strip()
-print('Logging to Todoist')
-with open(directory + '/do_not_share/login', 'r') as f:
-    login, password = f.read().strip().split(' ')
+print('Logging to Todoist.')
+login, password = pickle.load(open('login', 'rb'))
 user = todoist.login(login, password)
 projects = [p.name for p in user.get_projects()]
 print('Login successful. You can add a task.')
@@ -49,7 +48,7 @@ while add_new_task:
         print('with interval of repetition {} '.format(interval), end=' ')
     confirmation = input('? (Y)es/(N)o ')
     if confirmation[0] in 'Yy':
-        filename = tasks[0] + '_' + date.today().isoformat()
+        filename = tasks[0] + '_' + date.today().isoformat()+'.txt'
         if task_type in 'oO':
             nt = OneTime(one_time_dir + '/' + filename, name=projects[project_number - 1], tasks=tasks,
                          due_date=due_date, early=early)
