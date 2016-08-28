@@ -47,7 +47,7 @@ while add_new_task:
     task_type_name = 'one time' if task_type in 'oO' else 'recurring'
     task_plural = 'tasks' if len(tasks)>1 else 'task'
     tasks_string = ', '.join(tasks)
-    print('Do you want to add {} task to project {} with due date {} posting in {} early containing {}: {}'.format(
+    print('Do you want to add {} task to project {} with due date {} posting it {} early containing {}: {}'.format(
         task_type_name, projects[project_number], due_date.isoformat(), early, task_plural, tasks_string), end = '')
     if task_type in 'rR':
         print(' with interval of repetition {}'.format(interval), end='')
@@ -60,7 +60,7 @@ while add_new_task:
         else:
             nt = Recurring(recurring_dir + '/' + filename, name=projects[project_number], interval=interval,
                            tasks=tasks, due_date=due_date, early=early)
-        nt.write_task()
+        nt.write_task(False)
         add_new_task = input('Would you like to add another task? (Y)es/(N)o ')[0] in ['Y', 'y']        
         os.system('cls' if os.name == 'nt' else 'clear')
     else:
