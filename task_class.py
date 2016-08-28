@@ -102,8 +102,8 @@ class Recurring:
                                 self.early = relativedelta(years=+int(line_parse[1]))
                                 self.early_type = 3
 
-    def write_task(self):
-        print('Writing the changes.')
+    def write_task(self, verbose):
+        if verbose: print('Writing the changes.')
         with open(self.path, 'w') as f:
             f.write('P {}\n'.format(self.project_name))
             if self.interval_type == 0:
@@ -126,27 +126,27 @@ class Recurring:
                 f.write('E {} M\n'.format(self.early.months))
             elif self.early_type == 3:
                 f.write('E {} Y\n'.format(self.early.years)) 
-        print('Exiting.')
+        if verbose: print('Exiting.')
 
-    def execute(self, user, frontload=0):
+    def execute(self, user, verbose, frontload=0):
         r = False
-        if frontload != 0:
+        if frontload != 0 and verbose:
             print('Frontloading')
         for f in range(frontload + 1):
             if date.today() + relativedelta(days=f) >= self.due_date - self.early:
-                print('Action on date {}:'.format((date.today() + relativedelta(days=f)).isoformat()))
+                if verbose: print('Action on date {}:'.format((date.today() + relativedelta(days=f)).isoformat()))
                 todoist_project = user.get_project(self.project_name)
                 new_task = self.tasks[self.current]
                 due_date = self.due_date.isoformat()
                 # maby due_date = max(self.due_date, date.today()).isoformat()
                 todoist_project.add_task(new_task, date=due_date)
-                print('Added new task \'{}\' with due date {}.'.format(new_task, due_date))
+                if verbose: print('Added new task \'{}\' with due date {}.'.format(new_task, due_date))
                 # incrementing values
                 self.due_date = self.due_date + self.interval
                 self.current = (self.current + 1) % len(self.tasks)
                 r = True
             else:
-                print('No action needed on date {}.'.format((date.today() + relativedelta(days=f)).isoformat()))
+                if verbose: print('No action needed on date {}.'.format((date.today() + relativedelta(days=f)).isoformat()))
         return r
 
 
@@ -206,8 +206,8 @@ class OneTime:
                                 self.early = relativedelta(years=+int(line_parse[1]))
                                 self.early_type = 3
 
-    def write_task(self):
-        print('Writing the changes.')
+    def write_task(self, verbose):
+        if verbose: print('Writing the changes.')
         with open(self.path, 'w') as f:
             f.write('P {}\n'.format(self.project_name))
             for task in self.tasks:
@@ -221,25 +221,25 @@ class OneTime:
                 f.write('E {} M\n'.format(self.early.months))
             elif self.early_type == 3:
                 f.write('E {} Y\n'.format(self.early.years)) 
-        print('Exiting.')
+        if verbose: print('Exiting.')
 
-    def delete_file(self):
-        print('Removing file.')
+    def delete_file(self, verbose):
+        if verbose: print('Removing file.')
         os.remove(self.path)
-        print('Exiting.')
+        if verbose: print('Exiting.')
 
-    def execute(self, user, frontload=0):
-        if frontload != 0:
+    def execute(self, user, verbose, frontload=0):
+        if frontload != 0 and verbose:
             print('Frontloading')
         if date.today() + relativedelta(days=frontload) >= self.due_date - self.early:
-            print('Action on date {}:'.format((date.today() + relativedelta(days=frontload)).isoformat()))
+            if verbose: print('Action on date {}:'.format((date.today() + relativedelta(days=frontload)).isoformat()))
             todoist_project = user.get_project(self.project_name)
             due_date = self.due_date.isoformat()
             for task in self.tasks:
                 todoist_project.add_task(task, date=due_date)
-                print('Added new task \'{}\' with due date {}.'.format(task, due_date))
+                if verbose: print('Added new task \'{}\' with due date {}.'.format(task, due_date))
             # incrementing values
             return True
         else:
-            print('No action needed on date {}.'.format((date.today() + relativedelta(days=frontload)).isoformat()))
+            if verbose: print('No action needed on date {}.'.format((date.today() + relativedelta(days=frontload)).isoformat()))
             return False
