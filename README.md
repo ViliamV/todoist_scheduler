@@ -51,7 +51,7 @@ optional arguments:
                 default config.
 ```
 
-## Running on startup
+## Running at startup
 The best use of Todoist Scheduler is to run it in the background every time you start your computer (which is presumably every day).
 One way of achieving it is to create a bash script, for example, `launcher.sh` containing following:
 ```bash
