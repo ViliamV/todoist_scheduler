@@ -57,10 +57,13 @@ while add_new_task:
         if task_type in 'oO':
             nt = OneTime(one_time_dir + '/' + filename, name=projects[project_number], tasks=tasks,
                          due_date=due_date, early=early)
+            if not nt.execute(user, False, frontload=0):
+                nt.write_task(False)
         else:
             nt = Recurring(recurring_dir + '/' + filename, name=projects[project_number], interval=interval,
                            tasks=tasks, due_date=due_date, early=early)
-        nt.write_task(False)
+            nt.execute(user, False, frontload=0) 
+            nt.write_task(False)
         add_new_task = input('Would you like to add another task? (Y)es/(N)o ')[0] in ['Y', 'y']        
         os.system('cls' if os.name == 'nt' else 'clear')
     else:
