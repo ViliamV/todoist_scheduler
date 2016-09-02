@@ -10,16 +10,16 @@ I made Todoist Scheduler because I wanted more control over my recurring tasks i
 
 ## Setup
 1. Install the dependencies:
-```bash
+:  ```bash
     $ pip install pytodoist python-dateutil
 ```
 2. Download `*.py` files:
-```bash
+:  ```bash
     $ git clone https://github.com/ViliamV/todoist_scheduler.git
     $ cd todoist_scheduler/
 ```
 3. Run `todoist_scheduler.py --first` with parameter and follow the instructions:
-```bash
+:  ```bash
     $ ./todoist_scheduler.py --first
 ```
 ## Creating tasks
