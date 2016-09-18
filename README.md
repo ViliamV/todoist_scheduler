@@ -56,7 +56,8 @@ optional arguments:
                 default config.
 ```
 
-## Running at startup
+## Automation
+### Running at startup
 The best use of Todoist Scheduler is to run it in the background every time you start your computer (which is presumably every day).
 One way of achieving it is to create a bash script, for example, `launcher.sh` containing following:
 ```bash
@@ -71,6 +72,13 @@ Next, you want to make it executable:
     $ chmod u+x launcher.sh
 ```
 Finally, edit `/etc/rc.local` and add line `/path/to/launcher.sh`.
+
+### Bash aliases
+In order to speed up adding a new task, you can create aliases in you `.bashrc` or `.bash_aliases`:
+```bash_aliases
+alias task='cd /path/to/todoist_scheduler && python3 task_creator.py'
+alias todoist='cd /path/to/todoist_scheduler && python3 todoist_scheduler.py'
+```
 
 ## Front-loading
 When you will not be able to execute the script for the next `x` days, run:
