@@ -1,6 +1,8 @@
 # Todoist Scheduler
 Todoist Scheduler is a simple script that handles one-time and recurring tasks in plain text and creates tasks in [Todoist](http://www.todoist.com) when they are needed.
 
+![adding new task](new_task.gif)
+
 ## Motivation
 I made Todoist Scheduler because I wanted more control over my recurring tasks in Todoist. I spend some time every week decluttering  - deleting old contacts, archiving emails, organizing files. I liked the idea of having a list of tasks and looping over it in Todoist in specified intervals. However, to my knowledge, it is not possible. That's why I created this script and liked the clean look of empty Todolist (no recurring tasks that are not needed for 2 months) so I extended the functionality to one-time tasks as well. If you think that you might like the look of clean Todoist and have more control over recurring tasks, give it a try.
 

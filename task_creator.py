@@ -17,7 +17,6 @@ print('Logging to Todoist.')
 login, password = pickle.load(open('login', 'rb'))
 user = todoist.login(login, password)
 projects = [p.name for p in user.get_projects()]
-print('Login successful. You can add a task.')
 add_new_task = True
 while add_new_task:
     task_type = input('Input \'O\' for one time task or \'R\' for recurring task: ')
@@ -51,8 +50,8 @@ while add_new_task:
         task_type_name, projects[project_number], due_date.isoformat(), early, task_plural, tasks_string), end = '')
     if task_type in 'rR':
         print(' with interval of repetition {}'.format(interval), end='')
-    confirmation = input('? (Y)es/(N)o ')
-    if confirmation[0] in 'Yy':
+    confirmation = input('? (Y/n) ')
+    if confirmation=='' in 'Yy' or confirmation[0]:
         filename = tasks[0] + '_' + date.today().isoformat()+'.txt'
         if task_type in 'oO':
             nt = OneTime(one_time_dir + '/' + filename, name=projects[project_number], tasks=tasks,
@@ -64,7 +63,13 @@ while add_new_task:
                            tasks=tasks, due_date=due_date, early=early)
             nt.execute(user, False, frontload=0) 
             nt.write_task(False)
-        add_new_task = input('Would you like to add another task? (Y)es/(N)o ')[0] in ['Y', 'y']        
+        new_task = input('Would you like to add another task? (y/N) ')
+        if new_task == '':
+            add_new_task = False
+        elif new_task[0] in 'Yy':
+            add_new_task = True
+        else:
+            add_new_task = False          
         os.system('cls' if os.name == 'nt' else 'clear')
     else:
         add_new_task = True
