@@ -76,8 +76,8 @@ Finally, edit `/etc/rc.local` and add line `/path/to/launcher.sh`.
 ### Bash aliases
 In order to speed up adding a new task, you can create aliases in you `.bashrc` or `.bash_aliases`:
 ```bash_aliases
-alias task='cd /path/to/todoist_scheduler && python3 task_creator.py'
-alias todoist='cd /path/to/todoist_scheduler && python3 todoist_scheduler.py'
+alias task='python3 /path/to/todoist_scheduler/task_creator.py'
+alias todoist='python3 /path/to/todoist_scheduler/todoist_scheduler.py'
 ```
 
 ## Front-loading
