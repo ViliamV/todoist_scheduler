@@ -51,7 +51,7 @@ if parser.parse_args().first_start:
         f.write('# You can change the directories as you like.')
     print('By default, one-time tasks will be stored in directory\n {} and recurring tasks in directory\n {}.'.format(one_time_dir, recurring_dir))
 # normal run
-login, password = pickle.load(open('login', 'rb'))
+login, password = pickle.load(open(directory+'/login', 'rb'))
 user = todoist.login(login, password)
 one_time_dir, recurring_dir = None, None
 with open(directory + '/todoist_scheduler.conf') as conf:

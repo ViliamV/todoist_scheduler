@@ -14,7 +14,7 @@ with open(directory + '/todoist_scheduler.conf') as conf:
         elif line[0] == 'R':
             recurring_dir = line[2:].strip()
 print('Logging to Todoist.')
-login, password = pickle.load(open('login', 'rb'))
+login, password = pickle.load(open(directory+'/login', 'rb'))
 user = todoist.login(login, password)
 projects = [p.name for p in user.get_projects()]
 add_new_task = True
