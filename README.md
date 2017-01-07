@@ -32,7 +32,7 @@ To modify or create a new task, follow these conventions for the first symbol on
 Start each line with one of the listed letter followed by space:
 
 - `P ` - the name of Todoist project. If in doubt, use Inbox.
-- `I ` - for recurring tasks is an interval of repetition. Followed by number and word (or starting letter of a word) day/week/month/year.
+- `I ` - for recurring tasks is an interval of repetition. Followed by number and word (or starting letter of a word) day / week / month / month on the last day / year.
 - `T ` - task/tasks. Add as many as you want.
 - `C ` - if there are more tasks, this is an index of the next task to be processed. Omit it when creating a new task.
 - `D ` - ISO format of date of the due date of the next task
