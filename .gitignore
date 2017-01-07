@@ -5,6 +5,7 @@ launcher.sh
 one_time/*
 recurring/*
 todoist_scheduler.conf
+*.mp4
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -16,16 +16,16 @@ parser.add_argument('-v', dest='verbose', action='store_true',
                         help='Verbose output.')
 parser.add_argument('--first', dest='first_start', action='store_true',
                         help='First start of a script. Creates login information file and default config.')
-    
-frontload = parser.parse_args().frontload  
-verbose = parser.parse_args().verbose  
-directory = os.path.dirname(os.path.realpath(__file__))                    
+
+frontload = parser.parse_args().frontload
+verbose = parser.parse_args().verbose
+directory = os.path.dirname(os.path.realpath(__file__))
 if parser.parse_args().first_start:
     working_login = False
     print('This is a Todoist Scheduler. First input your Todoist login information.')
-    while not working_login:   
+    while not working_login:
         login = input('Login: ')
-        password = input('Password: ')        
+        password = input('Password: ')
         #login, password = pickle.load(open('login', 'rb'))
         #print(login, password)
         #test connection

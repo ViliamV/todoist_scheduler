@@ -21,7 +21,7 @@ add_new_task = True
 while add_new_task:
     task_type = input('Input \'O\' for one time task or \'R\' for recurring task: ')
     while task_type not in 'oOrR':
-        task_type = input('Wrong input. Input 1 for one time task or 2 for recurring task: ')
+        task_type = input('Wrong input. Input \'O\' for one time task or \'R\' for recurring task: ')
     print('These are your Todoist projects:')
     #print(list(zip(range(1, len(projects) + 1), projects)))
     for i, proj in enumerate(projects):
@@ -41,7 +41,7 @@ while add_new_task:
     if task_type in 'oO':
         pass
     else:
-        interval = input('What should be the repetition interval? (input can be such as \'1 day\' or \'2 W\'): ')
+        interval = input('What should be the repetition interval? (input can be such as \'1 day\', \'2 W\' or \'1 month on the last day\'): ')
     # Repeating
     task_type_name = 'one time' if task_type in 'oO' else 'recurring'
     task_plural = 'tasks' if len(tasks)>1 else 'task'
@@ -52,7 +52,7 @@ while add_new_task:
         print(' with interval of repetition {}'.format(interval), end='')
     confirmation = input('? (Y/n) ')
     if confirmation=='' in 'Yy' or confirmation[0]:
-        filename = tasks[0] + '_' + date.today().isoformat()+'.txt'
+        filename = '{}_{}.txt'.format(date.today().isoformat(), tasks[0])
         if task_type in 'oO':
             nt = OneTime(one_time_dir + '/' + filename, name=projects[project_number], tasks=tasks,
                          due_date=due_date, early=early)
@@ -61,7 +61,7 @@ while add_new_task:
         else:
             nt = Recurring(recurring_dir + '/' + filename, name=projects[project_number], interval=interval,
                            tasks=tasks, due_date=due_date, early=early)
-            nt.execute(user, False, frontload=0) 
+            nt.execute(user, False, frontload=0)
             nt.write_task(False)
         new_task = input('Would you like to add another task? (y/N) ')
         if new_task == '':
@@ -69,7 +69,7 @@ while add_new_task:
         elif new_task[0] in 'Yy':
             add_new_task = True
         else:
-            add_new_task = False          
+            add_new_task = False
         os.system('cls' if os.name == 'nt' else 'clear')
     else:
         add_new_task = True

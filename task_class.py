@@ -2,6 +2,7 @@ from pytodoist import todoist
 import os
 from datetime import date
 from dateutil.relativedelta import relativedelta
+import calendar
 
 
 class Recurring:
@@ -10,7 +11,7 @@ class Recurring:
         self.project_name = name if name is not None else ''
         if interval is None:
             self.interval = relativedelta(days=+7)
-            self.interval_type = 0 #0-days, 1-weeks, 2-months, 3-years
+            self.interval_type = 0 #0-days, 1-weeks, 2-months, 3-years 4-last day of month
         else:
             line_parse = interval.strip().split(' ')
             if len(line_parse) == 1:
@@ -24,14 +25,22 @@ class Recurring:
                     self.interval = relativedelta(weeks=+int(line_parse[0]))
                     self.interval_type = 1
                 elif line_parse[1][0] in 'Mm':
-                    self.interval = relativedelta(months=+int(line_parse[0]))
-                    self.interval_type = 2
+                    if len(line_parse) > 2:
+                        # last day of month
+                        self.interval = relativedelta(months=+int(line_parse[0]))
+                        self.interval_type = 4
+                    else:
+                        self.interval = relativedelta(months=+int(line_parse[0]))
+                        self.interval_type = 2
                 elif line_parse[1][0] in 'Yy':
                     self.interval = relativedelta(years=+int(line_parse[0]))
-                    self.interval_type = 3        
+                    self.interval_type = 3
         self.current = 0
         self.tasks = tasks if tasks is not None else []
         self.due_date = due_date if due_date is not None else date.today()
+        if self.interval_type == 4:
+            self.due_date = date((self.due_date + relativedelta(months=+1)).year,\
+                        (self.due_date + relativedelta(months=+1)).month, 1) - relativedelta(days=+1)
         if early is None:
             self.early = relativedelta(days=+1)
             self.early_type = 0 #0-days, 1-weeks, 2-months, 3-years
@@ -52,7 +61,7 @@ class Recurring:
                     self.early_type = 2
                 elif line_parse[1][0] in 'Yy':
                     self.early = relativedelta(years=+int(line_parse[0]))
-                    self.early_type = 3  
+                    self.early_type = 3
         if name is None and interval is None and tasks is None and due_date is None and early is None:
             with open(path) as f:
                 for line in f:
@@ -71,11 +80,19 @@ class Recurring:
                                 self.interval = relativedelta(weeks=+int(line_parse[1]))
                                 self.interval_type = 1
                             elif line_parse[2][0] in 'Mm':
-                                self.interval = relativedelta(months=+int(line_parse[1]))
-                                self.interval_type = 2
+                                if len(line_parse) > 3:
+                                    # last day of month
+                                    self.interval = relativedelta(months=+int(line_parse[1]))
+                                    self.interval_type = 4
+                                else:
+                                    self.interval = relativedelta(months=+int(line_parse[1]))
+                                    self.interval_type = 2
                             elif line_parse[2][0] in 'Yy':
                                 self.interval = relativedelta(years=+int(line_parse[1]))
                                 self.interval_type = 3
+                            elif line_parse[2][0] in 'Ll':
+                                self.interval = relativedelta(months=+int(line_parse[1]))
+                                self.interval_type = 4
                     elif line[0] == 'T':
                         self.tasks.append(line.strip()[2:])
                     elif line[0] == 'C':
@@ -83,7 +100,7 @@ class Recurring:
                     elif line[0] == 'D':
                         d = line.strip()[2:].split('-')
                         self.due_date = date(int(d[0]), int(d[1]), int(d[2]))
-                    elif line[0] == 'E':                        
+                    elif line[0] == 'E':
                         line_parse = line.strip().split(' ')
                         if len(line_parse) == 2:
                             self.early = relativedelta(days=+int(line_parse[1]))
@@ -113,7 +130,9 @@ class Recurring:
             elif self.interval_type == 2:
                 f.write('I {} M\n'.format(self.interval.months))
             elif self.interval_type == 3:
-                f.write('I {} Y\n'.format(self.interval.years))            
+                f.write('I {} Y\n'.format(self.interval.years))
+            elif self.interval_type == 4:
+                f.write('I {} M on the last day\n'.format(self.interval.months))
             for task in self.tasks:
                 f.write('T {}\n'.format(task))
             f.write('C {}\n'.format(self.current))
@@ -125,7 +144,7 @@ class Recurring:
             elif self.early_type == 2:
                 f.write('E {} M\n'.format(self.early.months))
             elif self.early_type == 3:
-                f.write('E {} Y\n'.format(self.early.years)) 
+                f.write('E {} Y\n'.format(self.early.years))
         if verbose: print('Exiting.')
 
     def execute(self, user, verbose, frontload=0):
@@ -138,11 +157,15 @@ class Recurring:
                 todoist_project = user.get_project(self.project_name)
                 new_task = self.tasks[self.current]
                 due_date = self.due_date.isoformat()
-                # maby due_date = max(self.due_date, date.today()).isoformat()
+                # maybe due_date = max(self.due_date, date.today()).isoformat()
                 todoist_project.add_task(new_task, date=due_date)
                 if verbose: print('Added new task \'{}\' with due date {}.'.format(new_task, due_date))
                 # incrementing values
-                self.due_date = self.due_date + self.interval
+                if self.interval_type < 4:
+                    self.due_date = self.due_date + self.interval
+                elif self.interval_type == 4:
+                    one_day = relativedelta(days=+1)
+                    self.due_date = ((self.due_date + one_day) + self.interval) - one_day
                 self.current = (self.current + 1) % len(self.tasks)
                 r = True
             else:
@@ -176,7 +199,7 @@ class OneTime:
                     self.early_type = 2
                 elif line_parse[1][0] in 'Yy':
                     self.early = relativedelta(years=+int(line_parse[0]))
-                    self.early_type = 3  
+                    self.early_type = 3
         if name is None and tasks is None and due_date is None and early is None:
             with open(path) as f:
                 for line in f:
@@ -186,8 +209,8 @@ class OneTime:
                         self.tasks.append(line.strip()[2:])
                     elif line[0] == 'D':
                         d = line.strip()[2:].split('-')
-                        self.due_date = date(int(d[0]), int(d[1]), int(d[2]))                    
-                    elif line[0] == 'E':                        
+                        self.due_date = date(int(d[0]), int(d[1]), int(d[2]))
+                    elif line[0] == 'E':
                         line_parse = line.strip().split(' ')
                         if len(line_parse) == 2:
                             self.early = relativedelta(days=+int(line_parse[1]))
@@ -220,7 +243,7 @@ class OneTime:
             elif self.early_type == 2:
                 f.write('E {} M\n'.format(self.early.months))
             elif self.early_type == 3:
-                f.write('E {} Y\n'.format(self.early.years)) 
+                f.write('E {} Y\n'.format(self.early.years))
         if verbose: print('Exiting.')
 
     def delete_file(self, verbose):
