@@ -2,19 +2,16 @@
 import os
 from datetime import date
 from pytodoist import todoist
-from task_class import *
+from task import *
+import toml
 import os
 import pickle
 
 directory = os.path.dirname(os.path.realpath(__file__))
-with open(directory + '/todoist_scheduler.conf') as conf:
-    for line in conf:
-        if line[0] == 'O':
-            one_time_dir = line[2:].strip()
-        elif line[0] == 'R':
-            recurring_dir = line[2:].strip()
+with open(directory + '/todoist_scheduler.conf') as f:
+    conf = toml.loads(f.read())
 print('Logging to Todoist.')
-login, password = pickle.load(open(directory+'/login', 'rb'))
+login, password = pickle.load(open(conf['login'], 'rb'))
 user = todoist.login(login, password)
 projects = [p.name for p in user.get_projects()]
 add_new_task = True
@@ -29,8 +26,7 @@ while add_new_task:
     project_number = int(input('To which project would you like to add a task? (enter a number): '))
     while project_number not in range(len(projects)):
         project_number = int(input('Project does not exist. Try again. '))
-    d = input('What is a due date? In YYYY-MM-DD format: ').split('-')
-    due_date = date(int(d[0]), int(d[1]), int(d[2]))
+    due_date = input('What is a due date? In YYYY-MM-DD format: ').strip()
     early = input('How early should be task added to Todoist? (input can be such as \'3 days\' or \'1 W\'): ')
     print('Now you can add as many tasks as you want. When finished, input empty line.')
     tasks = []
@@ -47,22 +43,22 @@ while add_new_task:
     task_plural = 'tasks' if len(tasks)>1 else 'task'
     tasks_string = ', '.join(tasks)
     print('Do you want to add {} task to project {} with due date {} posting it {} early containing {}: {}'.format(
-        task_type_name, projects[project_number], due_date.isoformat(), early, task_plural, tasks_string), end = '')
+        task_type_name, projects[project_number], due_date, early, task_plural, tasks_string), end = '')
     if task_type in 'rR':
         print(' with interval of repetition {}'.format(interval), end='')
     confirmation = input('? (Y/n) ')
-    if confirmation=='' in 'Yy' or confirmation[0]:
-        filename = '{}_{}.txt'.format(date.today().isoformat(), tasks[0])
-        if task_type in 'oO':
-            nt = OneTime(one_time_dir + '/' + filename, name=projects[project_number], tasks=tasks,
-                         due_date=due_date, early=early)
-            if not nt.execute(user, False, frontload=0):
-                nt.write_task(False)
-        else:
-            nt = Recurring(recurring_dir + '/' + filename, name=projects[project_number], interval=interval,
-                           tasks=tasks, due_date=due_date, early=early)
-            nt.execute(user, False, frontload=0)
-            nt.write_task(False)
+    if confirmation=='' or confirmation[0] in 'Yy':
+        filename = '{}/{}_{}.toml'.format(conf['tasks directory'],date.today().isoformat(), tasks[0])
+        task = default.copy()
+        task['project'] = name=projects[project_number]
+        task['tasks'] = tasks
+        task['due_date'] = due_date
+        task['early'] = early
+        if task_type in 'rR':
+            task['interval'] = interval
+            task['index'] = 0 
+        write(task, filename, False)
+        execute(task, user, False, filename)
         new_task = input('Would you like to add another task? (y/N) ')
         if new_task == '':
             add_new_task = False

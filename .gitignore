@@ -2,8 +2,7 @@
 login
 TODO
 launcher.sh
-one_time/*
-recurring/*
+tasks/*
 todoist_scheduler.conf
 *.mp4
 

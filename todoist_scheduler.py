@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 from pytodoist import todoist
 import os
-from datetime import timedelta
-from datetime import date
-from task_class import *
+from task import *
 import argparse
 import pickle
+import toml
 
 parser = argparse.ArgumentParser(description='''Todoist Scheduler can store future one-time or recurring tasks for Todoist \n
                                                 in plain text and create a task in Todoist when they are needed. \n
@@ -27,52 +26,31 @@ if parser.parse_args().first_start:
         login = input('Login: ')
         password = input('Password: ')
         #login, password = pickle.load(open('login', 'rb'))
-        #print(login, password)
         #test connection
         try:
             user = todoist.login(login, password)
             working_login = True
             print('Login successful. The credentials are stored in working directory in file \'login\'.')
         except:
-            print('Login unsuccessful. Try again, please.')
+            print('Login unsuccessful. Please, try again.')
     pickle.dump((login, password), open(directory + '/login', 'wb'))
-    one_time_dir = directory + '/one_time'
-    recurring_dir = directory + '/recurring'
-    if not os.path.exists(one_time_dir):
-        os.makedirs(one_time_dir)
-    if not os.path.exists(recurring_dir):
-        os.makedirs(recurring_dir)
+    dir = directory + '/tasks'
+    if not os.path.exists(dir):
+        os.makedirs(dir)
     print('Creating default configuration file todoist_scheduler.conf.  Feel free to change it.')
-    with open(directory + '/todoist_scheduler.conf', 'w') as f:
-        f.write('# Directory for One time tasks:\n')
-        f.write('O {}\n'.format(one_time_dir))
-        f.write('# Directory for Recurring tasks:\n')
-        f.write('R {}\n'.format(recurring_dir))
-        f.write('# You can change the directories as you like.')
-    print('By default, one-time tasks will be stored in directory\n {} and recurring tasks in directory\n {}.'.format(one_time_dir, recurring_dir))
+    conf = {"login": directory + '/login', "tasks directory": dir}
+    with open(f'{directory}/todoist_scheduler.conf', 'w') as f:
+        f.write(toml.dumps(conf))
+    print('By default, tasks will be stored in directory:\n{}.'.format(dir))
 # normal run
-login, password = pickle.load(open(directory+'/login', 'rb'))
+# load conf
+with open(f'{directory}/todoist_scheduler.conf', 'r') as f:
+    conf = toml.loads(f.read())
+login, password = pickle.load(open(conf['login'], 'rb'))
 user = todoist.login(login, password)
-one_time_dir, recurring_dir = None, None
-with open(directory + '/todoist_scheduler.conf') as conf:
-    for line in conf:
-        if line[0] == 'O':
-            one_time_dir = line[2:].strip()
-        elif line[0] == 'R':
-            recurring_dir = line[2:].strip()
-if one_time_dir is not None:
-    if verbose: print('One time tasks:')
-    for p in os.listdir(one_time_dir):
-        if verbose: print('Dealing with task {}.'.format(p))
-        task = OneTime(one_time_dir + '/' + p)
-        if task.execute(user, verbose, frontload=frontload):
-            task.delete_file(verbose)
-        if verbose: print()
-if recurring_dir is not None:
-    if verbose: print('Recurring tasks:')
-    for p in os.listdir(recurring_dir):
-        if verbose: print('Dealing with task {}.'.format(p))
-        task = Recurring(recurring_dir + '/' + p)
-        if task.execute(user, verbose, frontload=frontload):
-            task.write_task(verbose)
-        if verbose: print()
+for f in os.listdir(conf['tasks directory']):
+    if verbose: print('Dealing with task "{}".'.format(f.split('.')[0]))
+    filename = "{}/{}".format(conf['tasks directory'], f)
+    with open(filename) as ff:
+        task = fromfile(filename)
+        execute(task, user, verbose, filename, frontload)
