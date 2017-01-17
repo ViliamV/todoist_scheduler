@@ -48,7 +48,7 @@ while add_new_task:
         print(' with interval of repetition {}'.format(interval), end='')
     confirmation = input('? (Y/n) ')
     if confirmation=='' or confirmation[0] in 'Yy':
-        filename = '{}/{}_{}.toml'.format(conf['tasks directory'],date.today().isoformat(), tasks[0])
+        filename = '{}/{}_{}.toml'.format(conf['tasks_directory'],date.today().isoformat(), tasks[0])
         task = default.copy()
         task['project'] = name=projects[project_number]
         task['tasks'] = tasks

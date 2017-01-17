@@ -25,8 +25,9 @@ if parser.parse_args().first_start:
     while not working_login:
         login = input('Login: ')
         password = input('Password: ')
-        #login, password = pickle.load(open('login', 'rb'))
-        #test connection
+        # For testing
+        # login, password = pickle.load(open('login', 'rb'))
+        # test connection
         try:
             user = todoist.login(login, password)
             working_login = True
@@ -38,19 +39,20 @@ if parser.parse_args().first_start:
     if not os.path.exists(dir):
         os.makedirs(dir)
     print('Creating default configuration file todoist_scheduler.conf.  Feel free to change it.')
-    conf = {"login": directory + '/login', "tasks directory": dir}
+    conf = {"login": directory + '/login', "tasks_directory": dir}
     with open(f'{directory}/todoist_scheduler.conf', 'w') as f:
         f.write(toml.dumps(conf))
     print('By default, tasks will be stored in directory:\n{}.'.format(dir))
+    exit()
 # normal run
 # load conf
 with open(f'{directory}/todoist_scheduler.conf', 'r') as f:
     conf = toml.loads(f.read())
 login, password = pickle.load(open(conf['login'], 'rb'))
 user = todoist.login(login, password)
-for f in os.listdir(conf['tasks directory']):
+for f in os.listdir(conf['tasks_directory']):
     if verbose: print('Dealing with task "{}".'.format(f.split('.')[0]))
-    filename = "{}/{}".format(conf['tasks directory'], f)
+    filename = "{}/{}".format(conf['tasks_directory'], f)
     with open(filename) as ff:
         task = fromfile(filename)
         execute(task, user, verbose, filename, frontload)

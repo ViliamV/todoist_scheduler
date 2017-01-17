@@ -9,11 +9,12 @@ I made Todoist Scheduler because I wanted more control over my recurring tasks i
 ## Dependencies
 - [Dateutil](https://dateutil.readthedocs.io/en/stable/)
 - [PyTodoist](https://github.com/Garee/pytodoist)
+- [toml](https://github.com/uiri/toml)
 
 ## Setup
 #### 1. Install the dependencies:
 ```bash
-    $ pip install pytodoist python-dateutil
+    $ pip install pytodoist python-dateutil toml
 ```
 #### 2. Download `*.py` files:
 ```bash
@@ -26,17 +27,16 @@ I made Todoist Scheduler because I wanted more control over my recurring tasks i
 ```
 ## Creating tasks
 You can create tasks using `task_creator.py`.
-They will be stored in directories found in `todoist_scheduler.conf`.
-Each task is a separate plain text file that can be easily modified.
-To modify or create a new task, follow these conventions for the first symbol on each line.
-Start each line with one of the listed letter followed by space:
+They will be stored in directories `tasks`, but you can change it in `todoist_scheduler.conf`.
+Each task is a separate plain text file in [TOML format](https://github.com/toml-lang/toml) that can be easily modified.
+To modify or create a new task, follow these conventions:
 
-- `P ` - the name of Todoist project. If in doubt, use Inbox.
-- `I ` - for recurring tasks is an interval of repetition. Followed by number and word (or starting letter of a word) day / week / month / month on the last day / year.
-- `T ` - task/tasks. Add as many as you want.
-- `C ` - if there are more tasks, this is an index of the next task to be processed. Omit it when creating a new task.
-- `D ` - ISO format of date of the due date of the next task
-- `E ` - how many days in advance should be task put into Todoist. Followed by number and word (or starting letter of a word) day/week/month/year.
+- `project` - the name of Todoist project. If in doubt, use `"Inbox"`.
+- `interval` - for recurring tasks is an interval of repetition. It is a string containing number followed by word (or starting letter of a word) day / week / month / month on the last day / year.
+- `tasks` - task/tasks. Add as many as you want. They are strings (`" "`) in the array (`[  ]`)
+- `index` - This is an index of the next task to be processed, indexing starts from 0.
+- `date` - ISO format of due date of the next task
+- `early` - how many days in advance should be task put into Todoist. Number followed by word (or starting letter of a word) day/week/month/year.
 
 ## Usage
 ```
