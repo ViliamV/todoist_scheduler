@@ -41,7 +41,10 @@ def string_to_relativedelta(s, num_pos=0, text_pos=1):
     elif text in 'Ll':
         interval[1] = number
         interval[3] = -1
-    return relativedelta(years=interval[0], months=interval[1], weeks=interval[2], days=interval[3])
+    return relativedelta(years=interval[0],
+                         months=interval[1],
+                         weeks=interval[2],
+                         days=interval[3])
 
 def old_to_new_format(path):
     for filename in os.listdir(path):
@@ -52,7 +55,7 @@ def old_to_new_format(path):
                 if line[0] in 'Pp':
                     d["project"] = line.strip()[2:]
                 elif line[0] in 'Ii':
-                    d["interval"] = line.strip()[2:]                                     
+                    d["interval"] = line.strip()[2:]
                 elif line[0] in 'Tt':
                     d['tasks'].append(line.strip()[2:])
                 elif line[0] in 'Cc':
@@ -69,19 +72,19 @@ def write(task, filename, verbose):
     with open(filename, 'w') as f:
         f.write(toml.dumps(task))
     if verbose: print(f'-> Changes written to file {filename.split("/")[-1]}.')
-    
-def fromfile(filename): 
+
+def fromfile(filename):
     task = default.copy()
     with open(filename) as ff:
         f = toml.loads(ff.read())
     task.update(f)
     return task
-    
+
 def delete(task, filename, verbose):
     os.remove(filename)
     if verbose: print(f'-> File {filename.split("/")[-1]} deleted.')
-    
-def execute(task, user, verbose, filename, frontload=0):    
+
+def execute(task, user, verbose, filename, frontload=0):
     due_date = parse(task['due_date']).date()
     early = string_to_relativedelta(task['early'])
     todoist_project = user.get_project(task['project'])
@@ -93,13 +96,16 @@ def execute(task, user, verbose, filename, frontload=0):
             # One time task
             for t in task['tasks']:
                 todoist_project.add_task(t, date=task['due_date'])
-                if verbose: print('-> Added new task \'{}\' with due date {}.'.format(t, task['due_date']))
+                if verbose: print('-> Added new task \'{}\' with due date {}.'
+                        .format(t, task['due_date']))
             delete(task, filename, verbose)
             break
         else:
             # Recurring task
-            todoist_project.add_task(new_task['tasks'][new_task['index']], date=new_task['due_date'])
-            if verbose: print('-> Added new task \'{}\' with due date {}.'.format(new_task['tasks'][new_task['index']], new_task['due_date']))
+            todoist_project.add_task(new_task['tasks'][new_task['index']],
+                                     date=new_task['due_date'])
+            if verbose: print('-> Added new task \'{}\' with due date {}.'
+                    .format(new_task['tasks'][new_task['index']], new_task['due_date']))
             # incrementing values
             if interval.days == -1: # last day of month
                 due_date += relativedelta(days=+1)
@@ -107,5 +113,5 @@ def execute(task, user, verbose, filename, frontload=0):
             new_task['due_date'] = due_date.isoformat()
             new_task['index'] = (new_task['index'] + 1) % len(new_task['tasks'])
             rewrite = True
-    if rewrite: write(new_task, filename, verbose) 
-        
+    if rewrite: write(new_task, filename, verbose)
+
