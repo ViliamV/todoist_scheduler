@@ -32,11 +32,11 @@ Each task is a separate plain text file in [TOML format](https://github.com/toml
 To modify or create a new task, follow these conventions:
 
 - `project` - the name of Todoist project. If in doubt, use `"Inbox"`.
-- `interval` - for recurring tasks is an interval of repetition. It is a string containing number followed by word (or starting letter of a word) day / week / month / month on the last day / year.
 - `tasks` - task/tasks. Add as many as you want. They are strings (`" "`) in the array (`[  ]`)
-- `index` - This is an index of the next task to be processed, indexing starts from 0.
 - `date` - ISO format of due date of the next task
 - `early` - how many days in advance should be task put into Todoist. Number followed by word (or starting letter of a word) day/week/month/year.
+- `interval` - for recurring tasks is an interval of repetition. It is a string containing number followed by word (or starting letter of a word) day / week / month / month on the last day / year.
+- `index` - for recurring tasks this is an index of the next task to be processed, indexing starts from 0.
 
 ## Usage
 ```
