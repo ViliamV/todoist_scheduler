@@ -56,7 +56,7 @@ while add_new_task:
         task['early'] = early
         if task_type in 'rR':
             task['interval'] = interval
-            task['index'] = 0 
+            task['index'] = 0
         write(task, filename, False)
         execute(task, user, False, filename)
         new_task = input('Would you like to add another task? (y/N) ')

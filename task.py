@@ -14,7 +14,8 @@ default = {
     "interval": None,
     "repeat": None,
     "repeat_index": None,
-    "index": None
+    "index": None,
+    "priority": todoist.Priority.NORMAL
 }
 
 
@@ -95,7 +96,7 @@ def execute(task, user, verbose, filename, frontload=0):
         if task['interval'] is None:
             # One time task
             for t in task['tasks']:
-                todoist_project.add_task(t, date=task['due_date'])
+                todoist_project.add_task(t, date=task['due_date'], priority=task['priority'])
                 if verbose: print('-> Added new task \'{}\' with due date {}.'
                         .format(t, task['due_date']))
             delete(task, filename, verbose)
@@ -103,7 +104,7 @@ def execute(task, user, verbose, filename, frontload=0):
         else:
             # Recurring task
             todoist_project.add_task(new_task['tasks'][new_task['index']],
-                                     date=new_task['due_date'])
+                                     date=new_task['due_date'], priority=task['priority'])
             if verbose: print('-> Added new task \'{}\' with due date {}.'
                     .format(new_task['tasks'][new_task['index']], new_task['due_date']))
             # incrementing values

@@ -37,6 +37,7 @@ To modify or create a new task, follow these conventions:
 - `early` - how many days in advance should be task put into Todoist. Number followed by word (or starting letter of a word) day/week/month/year.
 - `interval` - for recurring tasks is an interval of repetition. It is a string containing number followed by word (or starting letter of a word) day / week / month / month on the last day / year.
 - `index` - for recurring tasks this is an index of the next task to be processed, indexing starts from 0.
+- `priority` - integer from {0..4}. 0 = no priority, 1 = low priority, 2 = normal priority, 3 = high priority, 4 = very high priority. The default value is 2. Currently it is not possible to set priority using `task_creator.py`
 
 ## Usage
 ```
