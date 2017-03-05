@@ -88,11 +88,13 @@ def delete(task, filename, verbose):
 def execute(task, user, verbose, filename, frontload=0):
     due_date = parse(task['due_date']).date()
     early = string_to_relativedelta(task['early'])
-    todoist_project = user.get_project(task['project'])
+    todoist_project = None
     new_task = task.copy()
     rewrite = False
     interval = string_to_relativedelta(task['interval'])
     while date.today() + relativedelta(days=frontload) >= due_date - early:
+        if todoist_project is None:
+            todoist_project = user.get_project(task['project'])
         if task['interval'] is None:
             # One time task
             for t in task['tasks']:
