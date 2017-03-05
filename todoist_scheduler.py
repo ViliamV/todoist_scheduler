@@ -21,20 +21,17 @@ verbose = parser.parse_args().verbose
 directory = os.path.dirname(os.path.realpath(__file__))
 if parser.parse_args().first_start:
     working_login = False
-    print('This is a Todoist Scheduler. First input your Todoist login information.')
+    print('This is a Todoist Scheduler. Go here, create new app and get Test Token.')
+    print('https://developer.todoist.com/appconsole.html')
     while not working_login:
-        login = input('Login: ')
-        password = input('Password: ')
-        # For testing
-        # login, password = pickle.load(open('login', 'rb'))
-        # test connection
+        token = input('Token: ')
         try:
-            user = todoist.login(login, password)
+            user = todoist.login_with_api_token(token)
             working_login = True
             print('Login successful. The credentials are stored in working directory in file \'login\'.')
         except:
             print('Login unsuccessful. Please, try again.')
-    pickle.dump((login, password), open(directory + '/login', 'wb'))
+    pickle.dump(token, open(directory + '/login', 'wb'))
     dir = directory + '/tasks'
     if not os.path.exists(dir):
         os.makedirs(dir)
@@ -48,8 +45,8 @@ if parser.parse_args().first_start:
 # load conf
 with open(f'{directory}/todoist_scheduler.conf', 'r') as f:
     conf = toml.loads(f.read())
-login, password = pickle.load(open(conf['login'], 'rb'))
-user = todoist.login(login, password)
+token = pickle.load(open(conf['login'], 'rb'))
+user = todoist.login_with_api_token(token)
 for f in os.listdir(conf['tasks_directory']):
     if verbose: print('Dealing with task "{}".'.format(f.split('.')[0]))
     filename = "{}/{}".format(conf['tasks_directory'], f)
