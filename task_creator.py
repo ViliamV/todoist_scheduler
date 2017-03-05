@@ -11,8 +11,8 @@ directory = os.path.dirname(os.path.realpath(__file__))
 with open(directory + '/todoist_scheduler.conf') as f:
     conf = toml.loads(f.read())
 print('Logging to Todoist.')
-login, password = pickle.load(open(conf['login'], 'rb'))
-user = todoist.login(login, password)
+token = pickle.load(open(conf['login'], 'rb'))
+user = todoist.login_with_api_token(token)
 projects = [p.name for p in user.get_projects()]
 add_new_task = True
 while add_new_task:
@@ -34,18 +34,24 @@ while add_new_task:
     while task != '':
         tasks.append(task)
         task = input('Task: ')
-    if task_type in 'oO':
-        pass
-    else:
+    if task_type in 'rR':
         interval = input('What should be the repetition interval? (input can be such as \'1 day\', \'2 W\' or \'1 month on the last day\'): ')
-    # Repeating
+    priorities = {0: 'no priority', 1: 'low priority', 2: 'normal priority', 3: 'high priority', 4: 'very high priority'}
+    print('What should be the task priority?')
+    for key, value in priorities.items():
+        print('{}={}'.format(key, value))
+    priority = input('or leave empty for default (normal priority): ')
+    if priority == '' or int(priority) not in range(5):
+        priority = 2
+    else:
+        priority = int(priority)
     task_type_name = 'one time' if task_type in 'oO' else 'recurring'
     task_plural = 'tasks' if len(tasks)>1 else 'task'
     tasks_string = ', '.join(tasks)
-    print('Do you want to add {} task to project {} with due date {} posting it {} early containing {}: {}'.format(
-        task_type_name, projects[project_number], due_date, early, task_plural, tasks_string), end = '')
+    print('Do you want to add {} task to project {} with due date {} posting it {} early containing {}: {} with {}'.format(
+        task_type_name, projects[project_number], due_date, early, task_plural, tasks_string, priorities[priority]), end = '')
     if task_type in 'rR':
-        print(' with interval of repetition {}'.format(interval), end='')
+        print(' and with interval of repetition {}'.format(interval), end='')
     confirmation = input('? (Y/n) ')
     if confirmation=='' or confirmation[0] in 'Yy':
         filename = '{}/{}_{}.toml'.format(conf['tasks_directory'],date.today().isoformat(), tasks[0])
