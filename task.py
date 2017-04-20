@@ -66,19 +66,15 @@ def old_to_new_format(path):
                 elif line[0] in 'Ee':
                     d['early'] = line.strip()[2:]
         new_filename = filename.strip().split('.')[0]
-        with open(f'{path}/{new_filename}.toml', 'w') as f:
-            f.write(toml.dumps(d))
+        toml.dump(d, open(f'{path}/{new_filename}.toml', 'w'))
 
 def write(task, filename, verbose):
-    with open(filename, 'w') as f:
-        f.write(toml.dumps(task))
+    toml.dump(task, open(filename, 'w'))
     if verbose: print(f'-> Changes written to file {filename.split("/")[-1]}.')
 
-def fromfile(filename):
+def from_file(filename):
     task = default.copy()
-    with open(filename) as ff:
-        f = toml.loads(ff.read())
-    task.update(f)
+    task.update(toml.load(filename))
     return task
 
 def delete(task, filename, verbose):

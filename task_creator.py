@@ -8,11 +8,9 @@ import os
 import pickle
 
 directory = os.path.dirname(os.path.realpath(__file__))
-with open(directory + '/todoist_scheduler.conf') as f:
-    conf = toml.loads(f.read())
+conf = toml.load(directory + '/todoist_scheduler.conf')
 print('Logging to Todoist.')
-token = pickle.load(open(conf['login'], 'rb'))
-user = todoist.login_with_api_token(token)
+user = todoist.login(*pickle.load(open(conf['login'], 'rb')))
 projects = [p.name for p in user.get_projects()]
 add_new_task = True
 while add_new_task:

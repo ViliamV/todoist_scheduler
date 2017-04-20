@@ -21,35 +21,35 @@ verbose = parser.parse_args().verbose
 directory = os.path.dirname(os.path.realpath(__file__))
 if parser.parse_args().first_start:
     working_login = False
-    print('This is a Todoist Scheduler. Go here, create new app and get Test Token.')
-    print('https://developer.todoist.com/appconsole.html')
+    print('This is a Todoist Scheduler. Please enter your Todoist email and password.')
+    print('They will be stored unencrypted as Python Pickle file so do not share the file \'login\'')
     while not working_login:
-        token = input('Token: ')
+        email = input('Email: ')
+        password = input('Password: ')
         try:
-            user = todoist.login_with_api_token(token)
+            todoist.login(email, password)
             working_login = True
-            print('Login successful. The credentials are stored in working directory in file \'login\'.')
+            print('Login successful.')
         except:
             print('Login unsuccessful. Please, try again.')
-    pickle.dump(token, open(directory + '/login', 'wb'))
+    pickle.dump((email, password), open(directory + '/login', 'wb'))
     dir = directory + '/tasks'
     if not os.path.exists(dir):
         os.makedirs(dir)
     print('Creating default configuration file todoist_scheduler.conf.  Feel free to change it.')
     conf = {"login": directory + '/login', "tasks_directory": dir}
-    with open(f'{directory}/todoist_scheduler.conf', 'w') as f:
-        f.write(toml.dumps(conf))
+    toml.dump(conf, open(f'{directory}/todoist_scheduler.conf', 'w'))
     print('By default, tasks will be stored in directory:\n{}.'.format(dir))
     exit()
 # normal run
 # load conf
-with open(f'{directory}/todoist_scheduler.conf', 'r') as f:
-    conf = toml.loads(f.read())
-token = pickle.load(open(conf['login'], 'rb'))
-user = todoist.login_with_api_token(token)
+
+conf = toml.load(f'{directory}/todoist_scheduler.conf')
+user = todoist.login(*pickle.load(open(conf['login'], 'rb')))
 for f in os.listdir(conf['tasks_directory']):
-    if verbose: print('Dealing with task "{}".'.format(f.split('.')[0]))
-    filename = "{}/{}".format(conf['tasks_directory'], f)
-    with open(filename) as ff:
-        task = fromfile(filename)
-        execute(task, user, verbose, filename, frontload)
+    if '.toml' in f or '.TOML' in f:
+        if verbose: print('Dealing with task "{}".'.format(f.split('.')[0]))
+        filename = "{}/{}".format(conf['tasks_directory'], f)
+        with open(filename) as ff:
+            task = from_file(filename)
+            execute(task, user, verbose, filename, frontload)
