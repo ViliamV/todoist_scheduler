@@ -70,7 +70,7 @@ def old_to_new_format(path):
 
 def write(task, filename, verbose):
     toml.dump(task, open(filename, 'w'))
-    if verbose: print(f'-> Changes written to file {filename.split("/")[-1]}.')
+    if verbose: print(f'-> Changes written to file {filename.split("/")[-1]}.', flush=True)
 
 def from_file(filename):
     task = default.copy()
@@ -79,7 +79,7 @@ def from_file(filename):
 
 def delete(task, filename, verbose):
     os.remove(filename)
-    if verbose: print(f'-> File {filename.split("/")[-1]} deleted.')
+    if verbose: print(f'-> File {filename.split("/")[-1]} deleted.', flush=True)
 
 def execute(task, user, verbose, filename, frontload=0):
     due_date = parse(task['due_date']).date()
@@ -96,7 +96,7 @@ def execute(task, user, verbose, filename, frontload=0):
             for t in task['tasks']:
                 todoist_project.add_task(t, date=task['due_date'], priority=task['priority'])
                 if verbose: print('-> Added new task \'{}\' with due date {}.'
-                        .format(t, task['due_date']))
+                        .format(t, task['due_date']), flush=True)
             delete(task, filename, verbose)
             break
         else:
@@ -104,7 +104,7 @@ def execute(task, user, verbose, filename, frontload=0):
             todoist_project.add_task(new_task['tasks'][new_task['index']],
                                      date=new_task['due_date'], priority=task['priority'])
             if verbose: print('-> Added new task \'{}\' with due date {}.'
-                    .format(new_task['tasks'][new_task['index']], new_task['due_date']))
+                    .format(new_task['tasks'][new_task['index']], new_task['due_date']), flush=True)
             # incrementing values
             if interval.days == -1: # last day of month
                 due_date += relativedelta(days=+1)

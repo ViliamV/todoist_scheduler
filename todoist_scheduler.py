@@ -45,7 +45,19 @@ if parser.parse_args().first_start:
 # load conf
 
 conf = toml.load(f'{directory}/todoist_scheduler.conf')
-user = todoist.login(*pickle.load(open(conf['login'], 'rb')))
+try:
+    user = todoist.login(*pickle.load(open(conf['login'], 'rb')))
+except:
+    try:
+        from gi.repository import Notify
+        Notify.init('Todoist scheduler')
+        notification = Notify.Notification.new('Unable to log in Todoist')
+        notification.set_urgency(2)
+        notification.show()
+    except:
+        pass
+    finally:
+        exit()
 for f in os.listdir(conf['tasks_directory']):
     if '.toml' in f or '.TOML' in f:
         if verbose: print('Dealing with task "{}".'.format(f.split('.')[0]))
