@@ -72,7 +72,7 @@ except:
     except:
         pass
     finally:
-        exit()
+        exit(1)
 for f in os.listdir(conf["tasks_directory"]):
     if ".toml" in f or ".TOML" in f:
         if verbose:
@@ -81,3 +81,4 @@ for f in os.listdir(conf["tasks_directory"]):
         with open(filename) as ff:
             task = from_file(filename)
             execute(task, user, verbose, filename, frontload)
+exit(0)
