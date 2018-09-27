@@ -5,7 +5,8 @@ If you want to:
 - store tasks that are in the far future without cluttering your Todoist
 - have complex recurring tasks such as `every week pick next item from the list of tasks and schedule it`
 - use **templates** for project with ease
-then *YES*, you should try it.
+
+then *YES* you should try it.
 
 ![adding new task](new_task.gif)
 
@@ -142,4 +143,4 @@ I made Todoist Scheduler because I wanted more control over my recurring tasks i
 I spend some time every week decluttering  - deleting old contacts, archiving emails, organizing files.
 I liked the idea of having a list of tasks and looping over it in Todoist in specified intervals. However, to my knowledge, it is not possible.
 That's why I created this script and liked the clean look of empty Todoist (no recurring tasks that are not needed for 2 months) so I extended the functionality to one-time tasks as well.
-Recently I also added support for Project templates which is great!
+Recently I also added support for Project templates which is more useful than I expected.
