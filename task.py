@@ -87,7 +87,7 @@ def delete(task, filename, verbose):
         print(f'-> File {filename.split("/")[-1]} deleted.', flush=True)
 
 
-def execute(task, user, verbose, filename, frontload=0):
+def execute_task(task, user, verbose, filename, frontload=0):
     due_date = parse(task["due_date"]).date()
     early = string_to_relativedelta(task["early"])
     todoist_project = None
