@@ -73,11 +73,12 @@ except:
         pass
     finally:
         exit()
-for f in os.listdir(conf["tasks_directory"]):
-    if ".toml" in f or ".TOML" in f:
-        if verbose:
-            print('Dealing with task "{}".'.format(f.split(".")[0]))
-        filename = "{}/{}".format(conf["tasks_directory"], f)
-        with open(filename) as ff:
-            task = from_file(filename)
-            execute(task, user, verbose, filename, frontload)
+for dirpath, dirs, files in os.walk(conf["tasks_directory"]):
+    for f in files:
+        if ".toml" in f.lower():
+            if verbose:
+                print(f'Dealing with task "{f}".')
+            filename = f'{dirpath}/{f}'
+            with open(filename) as ff:
+                task = from_file(filename)
+                execute(task, user, verbose, filename, frontload)
