@@ -5,10 +5,10 @@ from dateutil.parser import parse
 from datetime import datetime
 
 default_template = {
-    "name": None,
-    "priority": todoist.Priority.NORMAL,
-    "color": 'LIGHT_BLUE',
-    "tasks": []
+    'name': 'Template',
+    'priority': todoist.Priority.NORMAL,
+    'color': 'LIGHT_BLUE',
+    'tasks': []
 }
 
 def taskdelta(task):
@@ -28,11 +28,14 @@ def execute_template(filename, user, due_date):
         print(f'Creating project {project_name}')
         project = user.add_project(project_name, color=getattr(todoist.Color, template['color']))
         for task in template['tasks']:
-            priority = task['priority'] if 'priority' in task else template['priority']
-            task_date = due_date + taskdelta(task)
-            name = task['task'] if 'task' in task else 'Empty task'
-            project.add_task(name, date=task_date, priority=priority)
-            print(f'-> Added new task "{name}" with due date {task_date}.')
+            if 'task' in task:
+                priority = task['priority'] if 'priority' in task else template['priority']
+                task_date = due_date + taskdelta(task)
+                if isinstance(task['task'], str):
+                    task['task'] = [task['task']]
+                for name in task['task']:
+                    project.add_task(name, date=task_date, priority=priority)
+                    print(f'-> Added new task "{name}" with due date {task_date}.')
     except Exception as e:
         print(e)
         exit(1)

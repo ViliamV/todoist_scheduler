@@ -1,0 +1,14 @@
+name = "Test template"
+color = "RED"
+
+[[tasks]]
+task = "Do stuff before"
+when = -1
+
+[[tasks]]
+task = ["Do stuff on that day", "Do other stuff"]
+priority = 3
+
+[[tasks]]
+task = "Do stuff after"
+when = +1
