@@ -87,11 +87,13 @@ if __name__ == "__main__":
             execute_template(template, user, due_date)
         else:
             for dirpath, dirs, files in os.walk(conf["tasks_directory"]):
+                if verbose:
+                    print(f'Directory: {os.path.relpath(dirpath, conf["tasks_directory"])}')
                 for f in files:
                     if ".toml" in f.lower():
                         if verbose:
-                            print(f'Dealing with task "{f}".')
+                            print(f'  Task: {f}')
                         filename = f'{dirpath}/{f}'
                         with open(filename) as ff:
                             task = from_file(filename)
-                            execute(task, user, verbose, filename, frontload)
+                            execute_task(task, user, verbose, filename, frontload)

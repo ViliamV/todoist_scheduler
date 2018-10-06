@@ -88,7 +88,7 @@ while add_new_task:
             task["interval"] = interval
             task["index"] = 0
         write(task, filename, False)
-        execute(task, user, False, filename)
+        execute_task(task, user, False, filename)
         new_task = input("Would you like to add another task? (y/N) ")
         if new_task == "":
             add_new_task = False
