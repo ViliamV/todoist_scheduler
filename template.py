@@ -23,9 +23,9 @@ def execute_template(filename, user, due_date):
     else:
         print('No date for the project, starting today.')
         due_date = datetime.now().date()
-    project_name = f'{template["name"]} {due_date}'
+    project_name = '{} {}'.format(template["name"], due_date)
     try:
-        print(f'Creating project {project_name}')
+        print('Creating project {}'.format(project_name))
         project = user.add_project(project_name, color=getattr(todoist.Color, template['color']))
         for task in template['tasks']:
             if 'task' in task:
@@ -35,7 +35,7 @@ def execute_template(filename, user, due_date):
                     task['task'] = [task['task']]
                 for name in task['task']:
                     project.add_task(name, date=task_date, priority=priority)
-                    print(f'-> Added new task "{name}" with due date {task_date}.')
+                    print('-> Added new task "{}" with due date {}.'.format(name, task_date))
     except Exception as e:
         print(e)
         exit(1)

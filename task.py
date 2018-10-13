@@ -49,7 +49,7 @@ def string_to_relativedelta(s, num_pos=0, text_pos=1):
 
 def old_to_new_format(path):
     for filename in os.listdir(path):
-        with open(f"{path}/{filename}") as f:
+        with open("{}/{}".format(path, filename)) as f:
             d = default.copy()
             d["tasks"] = []
             for line in f:
@@ -66,7 +66,7 @@ def old_to_new_format(path):
                 elif line[0] in "Ee":
                     d["early"] = line.strip()[2:]
         new_filename = filename.strip().split(".")[0]
-        toml.dump(d, open(f"{path}/{new_filename}.toml", "w"))
+        toml.dump(d, open("{}/{}.toml".format(path, new_filename), "w"))
 
 
 def write(task, filename, verbose):
@@ -82,7 +82,7 @@ def from_file(filename):
 def delete(task, filename, verbose):
     os.remove(filename)
     if verbose:
-        print(f'  -> file {filename.split("/")[-1]} deleted')
+        print('  -> file {} deleted'.format(filename.split("/")[-1]))
 
 
 def execute_task(task, user, verbose, filename, frontload=0):
@@ -103,7 +103,7 @@ def execute_task(task, user, verbose, filename, frontload=0):
                 )
                 if verbose:
                     print(
-                        f'  -> added task with due date {task["due_date"]}')
+                        '  -> added task with due date {}'.format(task["due_date"]))
             delete(task, filename, verbose)
             break
 
@@ -120,7 +120,7 @@ def execute_task(task, user, verbose, filename, frontload=0):
                 )
                 if verbose:
                     print(
-                        f'  -> added task "{t}" with due date {new_task["due_date"]}')
+                        '  -> added task "{}" with due date {}'.format(t, new_task["due_date"]))
             # incrementing values
             if interval.days == -1:  # last day of month
                 due_date += relativedelta(days=+1)
