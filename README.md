@@ -26,25 +26,22 @@ then *YES* you should try it.
     ```bash
       pip install -r requirements.txt --user
     ```
-3. Run `./todoist_scheduler.py --first-start` and follow the instructions
+3. Run `./todoist_scheduler.py` and follow the instructions
 
 ## Usage
 ```
-usage: todoist_scheduler.py [-h] [-f FRONTLOAD] [-v] [--first-start]
-                            [--template TEMPLATE] [--date DATE]
+usage: todoist_scheduler.py [-h] [-f FRONTLOAD] [-v] [--template TEMPLATE]
+
 Todoist Scheduler can store future one-time or recurring tasks for Todoist in
 plain text and create a task in Todoist when they are needed. Also offers more
 features regarding a set of repeating tasks.
+
 optional arguments:
   -h, --help           show this help message and exit
   -f FRONTLOAD         Useful when you are going to be away from computer for
                        X days. Use X as a parameter.
   -v                   Verbose output.
-  --first-start        First start of a script. Creates login information file
-                       and default config.
   --template TEMPLATE  Run template file TEMPLATE
-  --date DATE          due date for project in YYYY-MM-DD format (defaults to
-                       today)
 ```
 
 ## Creating tasks
@@ -67,6 +64,7 @@ Example template looks like this:
 ```toml
 name = "Test template"
 color = "RED"
+due_date = "2018-11-26"
 priority = 2
 
 [[tasks]]
@@ -98,6 +96,7 @@ when = +1
     * DARK\_ORANGE
     * CYAN
     * LIGHT\_BLUE
+- `due_date` for project in YYYY-MM-DD format, defaults to today
 - `priority` defaults to 2 (normal), task priority is used over project priority
 - `when` is delta in days (plus or minus) from the project date and it defaults to 0
 - `task` can be string or an array of strings
