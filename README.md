@@ -4,7 +4,7 @@ Is this for you?
 If you want to:
 - store tasks that are in the far future without cluttering your Todoist
 - have complex recurring tasks such as `every week pick next item from the list of tasks and schedule it`
-- use **templates** for project with ease
+- use **your own templates** for projects
 
 then *YES* you should try it.
 
@@ -30,7 +30,7 @@ then *YES* you should try it.
 
 ## Usage
 ```
-usage: todoist_scheduler.py [-h] [-f FRONTLOAD] [-v] [--template TEMPLATE]
+usage: todoist_scheduler.py [-h] [-f FORWARD] [-v] [--template TEMPLATE]
 
 Todoist Scheduler can store future one-time or recurring tasks for Todoist in
 plain text and create a task in Todoist when they are needed. Also offers more
@@ -38,15 +38,16 @@ features regarding a set of repeating tasks.
 
 optional arguments:
   -h, --help           show this help message and exit
-  -f FRONTLOAD         Useful when you are going to be away from computer for
-                       X days. Use X as a parameter.
+  -f FORWARD           Execute tasks due in next X days.
   -v                   Verbose output.
   --template TEMPLATE  Run template file TEMPLATE
 ```
 
 ## Creating tasks
+### Interactive
 You can create tasks using `task_creator.py`.
 They will be stored in directories `tasks`, but you can change it in `todoist_scheduler.conf`.
+### Manual
 Each task is a separate plain text file in [TOML format](https://github.com/toml-lang/toml) that can be easily modified.
 To modify or create a new task, follow these conventions:
 
@@ -108,21 +109,8 @@ This is the result:
 ![template](template.png)
 
 ## Automation
-### Running at startup
-The best use of Todoist Scheduler is to run it in the background every time you start your computer (which is presumably every day).
-One way of achieving it is to create a bash script, for example, `launcher.sh` containing following:
-```bash
-#!/bin/sh
-# launcher.sh
-sleep 20
-sudo python3 /path/to/todoist_scheduler.py
-exit 0
-```
-Next, you want to make it executable:
-```bash
-    $ chmod u+x launcher.sh
-```
-Finally, edit `/etc/rc.local` and add line `/path/to/launcher.sh`.
+### CRON
+TODO
 
 ### Bash aliases
 In order to speed up adding a new task, you can create aliases in you `.bashrc` or `.bash_aliases`:
@@ -131,7 +119,7 @@ alias task='python3 /path/to/todoist_scheduler/task_creator.py'
 alias todoist='python3 /path/to/todoist_scheduler/todoist_scheduler.py'
 ```
 
-## Front-loading
+## Running tasks scheduled for later
 When you will not be able to execute the script for the next `x` days, run:
 ```bash
     $ ./todoist_scheduler.py -f x
