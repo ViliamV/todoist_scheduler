@@ -82,17 +82,17 @@ def from_file(filename):
 def delete(task, filename, verbose):
     os.remove(filename)
     if verbose:
-        print('  -> file {} deleted'.format(filename.split("/")[-1]))
+        print("  -> file {} deleted".format(filename.split("/")[-1]))
 
 
-def execute_task(task, user, verbose, filename, frontload=0):
+def execute_task(task, user, verbose, filename, forward=0):
     due_date = parse(task["due_date"]).date()
     early = string_to_relativedelta(task["early"])
     todoist_project = None
     new_task = task.copy()
     rewrite = False
     interval = string_to_relativedelta(task["interval"])
-    while date.today() + relativedelta(days=frontload) >= due_date - early:
+    while date.today() + relativedelta(days=forward) >= due_date - early:
         if todoist_project is None:
             todoist_project = user.get_project(task["project"])
         if task["interval"] is None:
@@ -102,8 +102,7 @@ def execute_task(task, user, verbose, filename, frontload=0):
                     t, date=task["due_date"], priority=task["priority"]
                 )
                 if verbose:
-                    print(
-                        '  -> added task with due date {}'.format(task["due_date"]))
+                    print("  -> added task with due date {}".format(task["due_date"]))
             delete(task, filename, verbose)
             break
 
@@ -114,13 +113,14 @@ def execute_task(task, user, verbose, filename, frontload=0):
                 tasks = [tasks]
             for t in tasks:
                 todoist_project.add_task(
-                    t,
-                    date=new_task["due_date"],
-                    priority=new_task["priority"],
+                    t, date=new_task["due_date"], priority=new_task["priority"]
                 )
                 if verbose:
                     print(
-                        '  -> added task "{}" with due date {}'.format(t, new_task["due_date"]))
+                        '  -> added task "{}" with due date {}'.format(
+                            t, new_task["due_date"]
+                        )
+                    )
             # incrementing values
             if interval.days == -1:  # last day of month
                 due_date += relativedelta(days=+1)

@@ -9,31 +9,26 @@ import toml
 
 parser = argparse.ArgumentParser(
     description="""Todoist Scheduler can store future one-time or recurring tasks for Todoist \n
-                                                in plain text and create a task in Todoist when they are needed. \n
-                                                Also offers more features regarding a set of repeating tasks."""
+                   in plain text and create a task in Todoist when they are needed. \n
+                   Also offers more features regarding a set of repeating tasks."""
 )
 parser.add_argument(
-    "-f",
-    dest="frontload",
-    type=int,
-    default=0,
-    help="Useful when you are going to be away from computer for X days. Use X as a parameter.",
+    "-f", dest="forward", type=int, default=0, help="Execute tasks due in next X days."
 )
 parser.add_argument("-v", dest="verbose", action="store_true", help="Verbose output.")
-parser.add_argument('--template', help='Run template file TEMPLATE')
+parser.add_argument("--template", help="Run template file TEMPLATE")
 
 args = parser.parse_args()
-frontload = args.frontload
-verbose = args.verbose
-template = args.template
 directory = os.path.dirname(os.path.realpath(__file__))
 
 if __name__ == "__main__":
-    if os.path.isfile(f"{directory}/todoist_scheduler.conf"):
-        conf = toml.load(f"{directory}/todoist_scheduler.conf")
+    if os.path.isfile("{}/todoist_scheduler.conf".format(directory)):
+        conf = toml.load("{}/todoist_scheduler.conf".format(directory))
     else:
         working_login = False
-        print("This is a Todoist Scheduler. Please enter your Todoist email and password.")
+        print(
+            "This is a Todoist Scheduler. Please enter your Todoist email and password."
+        )
         print(
             "They will be stored unencrypted as Python Pickle file so do not share the file 'login'"
         )
@@ -50,9 +45,7 @@ if __name__ == "__main__":
         dir = directory + "/tasks"
         if not os.path.exists(dir):
             os.makedirs(dir)
-        print(
-            "Creating default configuration file todoist_scheduler.conf"
-        )
+        print("Creating default configuration file todoist_scheduler.conf")
         conf = {"login": directory + "/login", "tasks_directory": dir}
         toml.dump(conf, open("{}/todoist_scheduler.conf".format(directory), "w"))
         print("By default, tasks will be stored in directory:\n{}.".format(dir))
@@ -61,6 +54,7 @@ if __name__ == "__main__":
     except:
         try:
             from gi.repository import Notify
+
             Notify.init("Todoist scheduler")
             notification = Notify.Notification.new("Unable to log in Todoist")
             notification.set_urgency(2)
@@ -69,17 +63,21 @@ if __name__ == "__main__":
             pass
         finally:
             exit(1)
-    if template:
-        execute_template(template, user)
+    if args.template:
+        execute_template(args.template, user)
     else:
         for dirpath, dirs, files in os.walk(conf["tasks_directory"]):
-            if verbose:
-                print('Directory: {}'.format(os.path.relpath(dirpath, conf["tasks_directory"])))
+            if args.verbose:
+                print(
+                    "Directory: {}".format(
+                        os.path.relpath(dirpath, conf["tasks_directory"])
+                    )
+                )
             for f in files:
                 if ".toml" in f.lower():
-                    if verbose:
-                        print('  Task: {}'.format(f))
-                    filename = '{}/{}'.format(dirpath, f)
+                    if args.verbose:
+                        print("  Task: {}".format(f))
+                    filename = "{}/{}".format(dirpath, f)
                     with open(filename) as ff:
                         task = from_file(filename)
-                        execute_task(task, user, verbose, filename, frontload)
+                        execute_task(task, user, args.verbose, filename, args.forward)
