@@ -15,18 +15,18 @@ def taskdelta(task):
     when = task['when'] if 'when' in task else 0
     return relativedelta(days=when)
 
-def execute_template(filename, user, due_date):
+def execute_template(filename, user):
     template = default_template.copy()
     template.update(toml.load(filename))
-    if due_date is not None:
-        due_date = parse(due_date).date()
+    if "due_date" in template:
+        due_date = parse(template["due_date"]).date()
     else:
-        print('No date for the project, starting today.')
         due_date = datetime.now().date()
     project_name = '{} {}'.format(template["name"], due_date)
     try:
         print('Creating project {}'.format(project_name))
-        project = user.add_project(project_name, color=getattr(todoist.Color, template['color']))
+        todoist_color = template['color'] if hasattr(todoist.Color, template['color']) else 'LIGHT_BLUE'
+        project = user.add_project(project_name, color=getattr(todoist.Color, todoist_color))
         for task in template['tasks']:
             if 'task' in task:
                 priority = task['priority'] if 'priority' in task else template['priority']

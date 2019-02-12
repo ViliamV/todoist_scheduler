@@ -20,25 +20,18 @@ parser.add_argument(
     help="Useful when you are going to be away from computer for X days. Use X as a parameter.",
 )
 parser.add_argument("-v", dest="verbose", action="store_true", help="Verbose output.")
-parser.add_argument(
-    "--first-start",
-    dest="first_start",
-    action="store_true",
-    help="First start of a script. Creates login information file and default config.",
-)
 parser.add_argument('--template', help='Run template file TEMPLATE')
-parser.add_argument('--date', help='due date for project in YYYY-MM-DD format (defaults to today)')
 
 args = parser.parse_args()
 frontload = args.frontload
 verbose = args.verbose
-first_start = args.first_start
 template = args.template
-due_date = args.date
 directory = os.path.dirname(os.path.realpath(__file__))
 
 if __name__ == "__main__":
-    if first_start:
+    if os.path.isfile(f"{directory}/todoist_scheduler.conf"):
+        conf = toml.load(f"{directory}/todoist_scheduler.conf")
+    else:
         working_login = False
         print("This is a Todoist Scheduler. Please enter your Todoist email and password.")
         print(
@@ -54,46 +47,39 @@ if __name__ == "__main__":
             except:
                 print("Login unsuccessful. Please, try again.")
         pickle.dump((email, password), open(directory + "/login", "wb"))
-        dirs = [directory + "/tasks", directory + "/templates"]
-        for dir in dirs:
-            if not os.path.exists(dir):
-                os.makedirs(dir)
+        dir = directory + "/tasks"
+        if not os.path.exists(dir):
+            os.makedirs(dir)
         print(
-            "Creating default configuration file todoist_scheduler.conf.  Feel free to change it."
+            "Creating default configuration file todoist_scheduler.conf"
         )
-        conf = {"login": directory + "/login", "tasks_directory": dirs[0], "templates_directory": dirs[1]}
+        conf = {"login": directory + "/login", "tasks_directory": dir}
         toml.dump(conf, open("{}/todoist_scheduler.conf".format(directory), "w"))
         print("By default, tasks will be stored in directory:\n{}.".format(dir))
-        exit()
-
-    else:
-        conf = toml.load("{}/todoist_scheduler.conf".format(directory))
+    try:
+        user = todoist.login(*pickle.load(open(conf["login"], "rb")))
+    except:
         try:
-            user = todoist.login(*pickle.load(open(conf["login"], "rb")))
+            from gi.repository import Notify
+            Notify.init("Todoist scheduler")
+            notification = Notify.Notification.new("Unable to log in Todoist")
+            notification.set_urgency(2)
+            notification.show()
         except:
-            try:
-                from gi.repository import Notify
-
-
-                Notify.init("Todoist scheduler")
-                notification = Notify.Notification.new("Unable to log in Todoist")
-                notification.set_urgency(2)
-                notification.show()
-            except:
-                pass
-            finally:
-                exit(1)
-        if template:
-            execute_template(template, user, due_date)
-        else:
-            for dirpath, dirs, files in os.walk(conf["tasks_directory"]):
-                if verbose:
-                    print('Directory: {}'.format(os.path.relpath(dirpath, conf["tasks_directory"])))
-                for f in files:
-                    if ".toml" in f.lower():
-                        if verbose:
-                            print('  Task: {}'.format(f))
-                        filename = '{}/{}'.format(dirpath, f)
-                        with open(filename) as ff:
-                            task = from_file(filename)
-                            execute_task(task, user, verbose, filename, frontload)
+            pass
+        finally:
+            exit(1)
+    if template:
+        execute_template(template, user)
+    else:
+        for dirpath, dirs, files in os.walk(conf["tasks_directory"]):
+            if verbose:
+                print('Directory: {}'.format(os.path.relpath(dirpath, conf["tasks_directory"])))
+            for f in files:
+                if ".toml" in f.lower():
+                    if verbose:
+                        print('  Task: {}'.format(f))
+                    filename = '{}/{}'.format(dirpath, f)
+                    with open(filename) as ff:
+                        task = from_file(filename)
+                        execute_task(task, user, verbose, filename, frontload)

@@ -1,5 +1,6 @@
 name = "Test template"
 color = "RED"
+due_date = "2018-11-26"
 
 [[tasks]]
 task = "Do stuff before"
