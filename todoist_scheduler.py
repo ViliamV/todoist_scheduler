@@ -54,15 +54,13 @@ if __name__ == "__main__":
             "Creating default configuration file todoist_scheduler.conf"
         )
         conf = {"login": directory + "/login", "tasks_directory": dir}
-        toml.dump(conf, open(f"{directory}/todoist_scheduler.conf", "w"))
+        toml.dump(conf, open("{}/todoist_scheduler.conf".format(directory), "w"))
         print("By default, tasks will be stored in directory:\n{}.".format(dir))
     try:
         user = todoist.login(*pickle.load(open(conf["login"], "rb")))
     except:
         try:
             from gi.repository import Notify
-
-
             Notify.init("Todoist scheduler")
             notification = Notify.Notification.new("Unable to log in Todoist")
             notification.set_urgency(2)
@@ -76,12 +74,12 @@ if __name__ == "__main__":
     else:
         for dirpath, dirs, files in os.walk(conf["tasks_directory"]):
             if verbose:
-                print(f'Directory: {os.path.relpath(dirpath, conf["tasks_directory"])}')
+                print('Directory: {}'.format(os.path.relpath(dirpath, conf["tasks_directory"])))
             for f in files:
                 if ".toml" in f.lower():
                     if verbose:
-                        print(f'  Task: {f}')
-                    filename = f'{dirpath}/{f}'
+                        print('  Task: {}'.format(f))
+                    filename = '{}/{}'.format(dirpath, f)
                     with open(filename) as ff:
                         task = from_file(filename)
                         execute_task(task, user, verbose, filename, frontload)
