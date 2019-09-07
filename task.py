@@ -74,11 +74,16 @@ def execute_task(task, api, verbose, filename, forward=0):
             todoist_project = api.projects.get(task["project"])
         if task["interval"] is None:
             # One time task
+            success = True
             for t in task["tasks"]:
-                api.create_task(t, todoist_project, task["due_date"], task["priority"])
-                if verbose:
-                    print("  -> added task with due date {}".format(task["due_date"]))
-            delete(task, filename, verbose)
+                task_success = api.create_task(t, todoist_project, task["due_date"], task["priority"])
+                if not task_success:
+                    success = False
+                else:
+                    if verbose:
+                        print("  -> added task with due date {}".format(task["due_date"]))
+            if success:
+                delete(task, filename, verbose)
             break
 
         else:
@@ -86,20 +91,25 @@ def execute_task(task, api, verbose, filename, forward=0):
             tasks = new_task["tasks"][new_task["index"]]
             if isinstance(tasks, str):
                 tasks = [tasks]
+            success = True
             for t in tasks:
-                api.create_task(t, todoist_project, new_task["due_date"], new_task["priority"])
-                if verbose:
-                    print(
-                        '  -> added task "{}" with due date {}'.format(
-                            t, new_task["due_date"]
+                task_success = api.create_task(t, todoist_project, new_task["due_date"], new_task["priority"])
+                if not task_success:
+                    success = False
+                else:
+                    if verbose:
+                        print(
+                            '  -> added task "{}" with due date {}'.format(
+                                t, new_task["due_date"]
+                            )
                         )
-                    )
-            # incrementing values
-            if interval.days == -1:  # last day of month
-                due_date += relativedelta(days=+1)
-            due_date += interval
-            new_task["due_date"] = due_date.isoformat()
-            new_task["index"] = (new_task["index"] + 1) % len(new_task["tasks"])
-            rewrite = True
+            if success:
+                # incrementing values
+                if interval.days == -1:  # last day of month
+                    due_date += relativedelta(days=+1)
+                due_date += interval
+                new_task["due_date"] = due_date.isoformat()
+                new_task["index"] = (new_task["index"] + 1) % len(new_task["tasks"])
+                rewrite = True
     if rewrite:
         write(new_task, filename, verbose)

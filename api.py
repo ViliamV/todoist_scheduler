@@ -11,7 +11,7 @@ class API:
 
     def _headers(self, post=True):
         headers = {
-            "Authorization": f"Bearer {self.token}"
+            "Authorization": "Bearer {}".format(self.token)
         }
         if post:
             headers.update({
@@ -20,13 +20,13 @@ class API:
             })
         return headers
 
-    def create_task(self, content, project, due, priority=2):
+    def create_task(self, content, project, due_date, priority=2):
         response = requests.post(
         "https://api.todoist.com/rest/v1/tasks",
         data=json.dumps({
             "content": content,
             "project_id": project,
-            "due_datetime": due.isoformat(),
+            "due_date": due_date,
             "priority": priority
         }),
         headers=self._headers())
@@ -56,26 +56,33 @@ class API:
         return self._get_projects().status_code == 200
 
     @classmethod
-    def create_new(cls, directory):
+    def create_new(cls, directory, missing_conf=False, missing_location=False, missing_token=False):
         import pickle
         import os
         import toml
 
-        print("This is a Todoist Scheduler. Please enter your Todoist token.")
-        print("It will be stored unencrypted as Python Pickle file so do not share the file 'token'")
-        while True:
-            token = input("Token: ")
-            api = cls(token)
-            if api.verify_token(token):
-                print("Login successful.")
-                pickle.dump(token, open(directory + "/token", "wb"))
-                dir = directory + "/tasks"
-                if not os.path.exists(dir):
-                    os.makedirs(dir)
-                print("Creating default configuration file todoist_scheduler.conf")
-                conf = {"token": directory + "/token", "tasks_directory": dir}
-                toml.dump(conf, open("{}/todoist_scheduler.conf".format(directory), "w"))
-                print("By default, tasks will be stored in directory:\n{}.".format(dir))
-                return api
-            else:
-                print("Login unsuccessful. Please, try again.")
+        dir = directory + "/tasks"
+        if missing_conf:
+            print("This is a Todoist Scheduler.")
+            print("Creating default configuration file todoist_scheduler.conf")
+            conf = {"tasks_directory": dir}
+            toml.dump(conf, open("{}/todoist_scheduler.conf".format(directory), "w"))
+            print("By default, tasks will be stored in directory:\n{}.".format(dir))
+        if missing_location or missing_conf:
+            conf = toml.load("{}/todoist_scheduler.conf".format(directory))
+            conf["token"] = directory + "/token"
+            toml.dump(conf, open("{}/todoist_scheduler.conf".format(directory), "w"))
+        if missing_token or missing_location or missing_conf:
+            print("Please enter your Todoist token.")
+            print("It will be stored unencrypted as Python Pickle file so do not share the file 'token'")
+            while True:
+                token = input("Token: ")
+                api = cls(token)
+                if api.valid:
+                    print("Login successful.")
+                    pickle.dump(token, open(directory + "/token", "wb"))
+                    if not os.path.exists(dir):
+                        os.makedirs(dir)
+                    return api
+                else:
+                    print("Login unsuccessful. Please, try again.")

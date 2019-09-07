@@ -22,13 +22,19 @@ args = parser.parse_args()
 directory = os.path.dirname(os.path.realpath(__file__))
 
 if __name__ == "__main__":
-    if os.path.isfile("{}/todoist_scheduler.conf".format(directory)):
+    if not os.path.isfile("{}/todoist_scheduler.conf".format(directory)):
+        api = API.create_new(directory, missing_conf=True)
+    else:
         conf = toml.load("{}/todoist_scheduler.conf".format(directory))
         token_location = conf.get("token")
-        token = pickle.load(open(token_location, "rb"))
-        api = API(token)
-    else:
-        api = API.create_new(directory)
+        if not token_location:
+            api = API.create_new(directory, missing_location=True)
+        else:
+            token = pickle.load(open(token_location, "rb"))
+            if not token:
+                api = API.create_new(directory, missing_token=True)
+            else:
+                api = API(token)
     if api.valid:
         if args.template:
             execute_template(args.template, api)
