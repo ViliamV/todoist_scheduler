@@ -1,3 +1,2 @@
-pytodoist
 python-dateutil
 toml

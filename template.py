@@ -1,4 +1,3 @@
-from pytodoist import todoist
 import toml
 from dateutil.relativedelta import relativedelta
 from dateutil.parser import parse
@@ -6,8 +5,7 @@ from datetime import datetime
 
 default_template = {
     "name": "Template",
-    "priority": todoist.Priority.NORMAL,
-    "color": "LIGHT_BLUE",
+    "priority": 2,
     "tasks": [],
 }
 
@@ -17,7 +15,7 @@ def taskdelta(task):
     return relativedelta(days=when)
 
 
-def execute_template(filename, user):
+def execute_template(filename, api):
     template = default_template.copy()
     template.update(toml.load(filename))
     if "due_date" in template:
@@ -27,14 +25,7 @@ def execute_template(filename, user):
     project_name = "{} {}".format(template["name"], due_date)
     try:
         print("Creating project {}".format(project_name))
-        todoist_color = (
-            template["color"]
-            if hasattr(todoist.Color, template["color"])
-            else "LIGHT_BLUE"
-        )
-        project = user.add_project(
-            project_name, color=getattr(todoist.Color, todoist_color)
-        )
+        project_id = api.create_project(project_name)
         for task in template["tasks"]:
             if "task" in task:
                 priority = (
@@ -44,7 +35,7 @@ def execute_template(filename, user):
                 if isinstance(task["task"], str):
                     task["task"] = [task["task"]]
                 for name in task["task"]:
-                    project.add_task(name, date=task_date, priority=priority)
+                    api.create_task(name, project_id, task_date, priority)
                     print(
                         '-> Added new task "{}" with due date {}.'.format(
                             name, task_date

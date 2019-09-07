@@ -1,4 +1,3 @@
-from pytodoist import todoist
 import toml
 import os
 from dateutil.relativedelta import relativedelta
@@ -14,7 +13,7 @@ default = {
     "repeat": None,
     "repeat_index": None,
     "index": None,
-    "priority": todoist.Priority.NORMAL,
+    "priority": 2,
 }
 
 
@@ -47,28 +46,6 @@ def string_to_relativedelta(s, num_pos=0, text_pos=1):
     )
 
 
-def old_to_new_format(path):
-    for filename in os.listdir(path):
-        with open("{}/{}".format(path, filename)) as f:
-            d = default.copy()
-            d["tasks"] = []
-            for line in f:
-                if line[0] in "Pp":
-                    d["project"] = line.strip()[2:]
-                elif line[0] in "Ii":
-                    d["interval"] = line.strip()[2:]
-                elif line[0] in "Tt":
-                    d["tasks"].append(line.strip()[2:])
-                elif line[0] in "Cc":
-                    d["index"] = int(line.strip().split(" ")[1])
-                elif line[0] in "Dd":
-                    d["due_date"] = line.strip()[2:]
-                elif line[0] in "Ee":
-                    d["early"] = line.strip()[2:]
-        new_filename = filename.strip().split(".")[0]
-        toml.dump(d, open("{}/{}.toml".format(path, new_filename), "w"))
-
-
 def write(task, filename, verbose):
     toml.dump(task, open(filename, "w"))
 
@@ -85,7 +62,7 @@ def delete(task, filename, verbose):
         print("  -> file {} deleted".format(filename.split("/")[-1]))
 
 
-def execute_task(task, user, verbose, filename, forward=0):
+def execute_task(task, api, verbose, filename, forward=0):
     due_date = parse(task["due_date"]).date()
     early = string_to_relativedelta(task["early"])
     todoist_project = None
@@ -94,13 +71,11 @@ def execute_task(task, user, verbose, filename, forward=0):
     interval = string_to_relativedelta(task["interval"])
     while date.today() + relativedelta(days=forward) >= due_date - early:
         if todoist_project is None:
-            todoist_project = user.get_project(task["project"])
+            todoist_project = api.projects.get(task["project"])
         if task["interval"] is None:
             # One time task
             for t in task["tasks"]:
-                todoist_project.add_task(
-                    t, date=task["due_date"], priority=task["priority"]
-                )
+                api.create_task(t, todoist_project, task["due_date"], task["priority"])
                 if verbose:
                     print("  -> added task with due date {}".format(task["due_date"]))
             delete(task, filename, verbose)
@@ -112,9 +87,7 @@ def execute_task(task, user, verbose, filename, forward=0):
             if isinstance(tasks, str):
                 tasks = [tasks]
             for t in tasks:
-                todoist_project.add_task(
-                    t, date=new_task["due_date"], priority=new_task["priority"]
-                )
+                api.create_task(t, todoist_project, new_task["due_date"], new_task["priority"])
                 if verbose:
                     print(
                         '  -> added task "{}" with due date {}'.format(

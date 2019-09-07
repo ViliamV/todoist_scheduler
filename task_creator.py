@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-import os
+from api import API
 from datetime import date
-from pytodoist import todoist
 from task import *
 import toml
 import os
@@ -21,9 +20,10 @@ def create_task():
     directory = os.path.dirname(os.path.realpath(__file__))
     conf = toml.load(directory + "/todoist_scheduler.conf")
     print("Logging to Todoist.")
-    user = todoist.login(*pickle.load(open(conf["login"], "rb")))
-    if user:
-        projects = [p.name for p in user.get_projects()]
+    api = API(pickle.load(open(conf["token"], "rb")))
+    if api.valid:
+        api.get_projects()
+        projects = api.projects.keys()
         add_new_task = True
         while add_new_task:
             # Tasks
@@ -110,7 +110,7 @@ def create_task():
                     task["interval"] = interval
                     task["index"] = 0
                 write(task, filename, False)
-                execute_task(task, user, False, filename)
+                execute_task(task, api, False, filename)
                 new_task = input("Would you like to add another task? (y/N) ")
                 if new_task == "":
                     add_new_task = False
