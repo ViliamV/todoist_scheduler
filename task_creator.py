@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 from api import API
 from datetime import date
-from task import *
+from task import Task
 import toml
-import os
+import pathlib
 import pickle
 from enum import Enum
 
@@ -17,13 +17,12 @@ class TaskType(Enum):
 
 
 def create_task():
-    directory = os.path.dirname(os.path.realpath(__file__))
-    conf = toml.load(directory + "/todoist_scheduler.conf")
+    directory = pathlib.Path(__file__).resolve().parent
+    conf = toml.load(str(directory / "todoist_scheduler.conf"))
     print("Logging to Todoist.")
     api = API(pickle.load(open(conf["token"], "rb")))
     if api.valid:
-        api.get_projects()
-        projects = api.projects.keys()
+        projects = list(api.projects.keys())
         add_new_task = True
         while add_new_task:
             # Tasks
@@ -98,19 +97,20 @@ def create_task():
                 print(" and with interval of repetition {}".format(interval), end="")
             confirmation = input("? (Y/n) ")
             if confirmation == "" or confirmation[0] in "Yy":
-                filename = "{}/{}_{}.toml".format(
-                    conf["tasks_directory"], date.today().isoformat(), tasks[0]
-                )
-                task = default.copy()
-                task["project"] = projects[project_number]
-                task["tasks"] = tasks
-                task["due_date"] = due_date
-                task["early"] = early
+                filename = pathlib.Path(conf["tasks_directory"]) / "{}_{}.toml".format(date.today().isoformat(), tasks[0])
+                task = {
+                    "project": projects[project_number],
+                    "tasks": tasks,
+                    "due_date": due_date,
+                    "early": early,
+                    "priority": priority,
+                }
                 if task_type == TaskType.RECURRING:
                     task["interval"] = interval
                     task["index"] = 0
-                write(task, filename, False)
-                execute_task(task, api, False, filename)
+                todoist_task = Task(api, filename, False, **task)
+                todoist_task.write()
+                todoist_task.execute()
                 new_task = input("Would you like to add another task? (y/N) ")
                 if new_task == "":
                     add_new_task = False
@@ -118,7 +118,7 @@ def create_task():
                     add_new_task = True
                 else:
                     add_new_task = False
-                os.system("cls" if os.name == "nt" else "clear")
+                # os.system("cls" if os.name == "nt" else "clear")
             else:
                 add_new_task = True
 

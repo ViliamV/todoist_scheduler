@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-import os
-from task import from_file, execute_task
+from task import Task
+import pathlib
 from template import execute_template
 from api import API
 import argparse
@@ -19,13 +19,14 @@ parser.add_argument("-v", dest="verbose", action="store_true", help="Verbose out
 parser.add_argument("--template", help="Run template file TEMPLATE")
 
 args = parser.parse_args()
-directory = os.path.dirname(os.path.realpath(__file__))
+directory = pathlib.Path(__file__).resolve().parent
 
 if __name__ == "__main__":
-    if not os.path.isfile("{}/todoist_scheduler.conf".format(directory)):
+    conf_file = directory / "todoist_scheduler.conf"
+    if not conf_file.is_file():
         api = API.create_new(directory, missing_conf=True)
     else:
-        conf = toml.load("{}/todoist_scheduler.conf".format(directory))
+        conf = toml.load(str(conf_file))
         token_location = conf.get("token")
         if not token_location:
             api = API.create_new(directory, missing_location=True)
@@ -39,21 +40,12 @@ if __name__ == "__main__":
         if args.template:
             execute_template(args.template, api)
         else:
-            for dirpath, dirs, files in os.walk(conf["tasks_directory"]):
+            tasks = pathlib.Path(conf["tasks_directory"])
+            for filename in tasks.rglob("*.toml"):
                 if args.verbose:
-                    print(
-                        "Directory: {}".format(
-                            os.path.relpath(dirpath, conf["tasks_directory"])
-                        )
-                    )
-                for f in files:
-                    if ".toml" in f.lower():
-                        if args.verbose:
-                            print("  Task: {}".format(f))
-                        filename = "{}/{}".format(dirpath, f)
-                        with open(filename) as ff:
-                            task = from_file(filename)
-                            execute_task(task, api, args.verbose, filename, args.forward)
+                    print("Task: {}".format(filename.name))
+                task = Task.from_file(filename, api, args.verbose)
+                task.execute(args.forward)
     else:
         print("Token not valid")
         exit(1)

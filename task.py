@@ -1,106 +1,84 @@
-import toml
-import os
-from dateutil.relativedelta import relativedelta
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from datetime import date
 from dateutil.parser import parse
-from datetime import datetime, date
-
-default = {
-    "project": None,
-    "tasks": None,
-    "due_date": None,
-    "early": None,
-    "interval": None,
-    "repeat": None,
-    "repeat_index": None,
-    "index": None,
-    "priority": 2,
-}
+from dateutil.relativedelta import relativedelta
+import deltaparser
+import pathlib
+import toml
 
 
-def string_to_relativedelta(s, num_pos=0, text_pos=1):
-    if s is None:
-        return None
+class Task:
+    task_attrs = ["project", "tasks", "due_date", "early", "interval", "repeat", "index", "priority"]
 
-    interval = [0, 0, 0, 0]  # years, months, weeks, days
-    line = s.strip().split(" ")
-    number = int(line[num_pos])
-    text = line[text_pos][0]
-    if text in "Dd":
-        interval[3] = number
-    elif text in "Ww":
-        interval[2] = number
-    elif text in "Mm":
-        if len(line) > 2:
-            # last day of month
-            interval[1] = number
-            interval[3] = -1
+    def __init__(self, api, filename, verbose, **kwargs):
+        self._api = api
+        self._file = pathlib.Path(filename)
+        self._verbose = verbose
+        # Task
+        self.priority = 2
+        self.project = None
+        self.tasks = []
+        self.due_date = None
+        self.early = None
+        self.interval = None
+        self.repeat = None
+        self.index = None
+        for k, v in kwargs.items():
+            if k in self.task_attrs:
+                setattr(self, k, v)
+        self._one_time_task = self.interval is None
+
+    def write(self):
+        data = {x: getattr(self, x) for x in self.task_attrs}
+        toml.dump(data, self._file.open(mode="w"))
+
+    def _delete(self):
+        self._file.unlink()
+        if self._verbose:
+            print("  -> file {} deleted".format(self._file.name))
+
+    def execute(self, forward=0):
+        if self._one_time_task:
+            self._execute_one_time(forward=forward)
         else:
-            interval[1] = number
-    elif text in "Yy":
-        interval[0] = number
-    elif text in "Ll":
-        interval[1] = number
-        interval[3] = -1
-    return relativedelta(
-        years=interval[0], months=interval[1], weeks=interval[2], days=interval[3]
-    )
+            self._execute_recurring(forward=forward)
 
+    def _execute_one_time(self, forward):
+        todoist_project = self._api.projects.get(self.project)
+        success = True
+        for t in self.tasks:
+            task_success = self._api.create_task(t, todoist_project, self.due_date, self.priority)
+            if not task_success:
+                success = False
+            else:
+                if self._verbose:
+                    print("  -> added task with due date {}".format(self.due_date))
+        if success:
+            self._delete()
 
-def write(task, filename, verbose):
-    toml.dump(task, open(filename, "w"))
-
-
-def from_file(filename):
-    task = default.copy()
-    task.update(toml.load(filename))
-    return task
-
-
-def delete(task, filename, verbose):
-    os.remove(filename)
-    if verbose:
-        print("  -> file {} deleted".format(filename.split("/")[-1]))
-
-
-def execute_task(task, api, verbose, filename, forward=0):
-    due_date = parse(task["due_date"]).date()
-    early = string_to_relativedelta(task["early"])
-    todoist_project = None
-    new_task = task.copy()
-    rewrite = False
-    interval = string_to_relativedelta(task["interval"])
-    while date.today() + relativedelta(days=forward) >= due_date - early:
-        if todoist_project is None:
-            todoist_project = api.projects.get(task["project"])
-        if task["interval"] is None:
-            # One time task
-            success = True
-            for t in task["tasks"]:
-                task_success = api.create_task(t, todoist_project, task["due_date"], task["priority"])
-                if not task_success:
-                    success = False
-                else:
-                    if verbose:
-                        print("  -> added task with due date {}".format(task["due_date"]))
-            if success:
-                delete(task, filename, verbose)
-            break
-
-        else:
-            # Recurring task
-            tasks = new_task["tasks"][new_task["index"]]
+    def _execute_recurring(self, forward):
+        due_date = parse(self.due_date).date()
+        early = deltaparser.parse(self.early)
+        rewrite = False
+        interval = deltaparser.parse(self.interval)
+        todoist_project = self._api.projects.get(self.project)
+        goal_date = date.today() + relativedelta(days=forward)
+        while goal_date >= due_date - early:
+            tasks = self.tasks[self.index]
             if isinstance(tasks, str):
                 tasks = [tasks]
             success = True
             for t in tasks:
-                task_success = api.create_task(t, todoist_project, new_task["due_date"], new_task["priority"])
+                task_success = self._api.create_task(t, todoist_project, self.due_date, self.priority)
                 if not task_success:
                     success = False
                 else:
-                    if verbose:
+                    if self._verbose:
                         print(
                             '  -> added task "{}" with due date {}'.format(
-                                t, new_task["due_date"]
+                                t, self.due_date
                             )
                         )
             if success:
@@ -108,8 +86,14 @@ def execute_task(task, api, verbose, filename, forward=0):
                 if interval.days == -1:  # last day of month
                     due_date += relativedelta(days=+1)
                 due_date += interval
-                new_task["due_date"] = due_date.isoformat()
-                new_task["index"] = (new_task["index"] + 1) % len(new_task["tasks"])
+                self.due_date = due_date.isoformat()
+                self.index += 1
+                self.index %= len(self.tasks)
                 rewrite = True
-    if rewrite:
-        write(new_task, filename, verbose)
+        if rewrite:
+            self.write()
+
+    @classmethod
+    def from_file(cls, filename, api, verbose):
+        loaded = toml.load(str(filename))
+        return cls(api, filename, verbose, **loaded)
