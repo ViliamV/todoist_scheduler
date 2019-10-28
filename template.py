@@ -3,11 +3,7 @@ from dateutil.relativedelta import relativedelta
 from dateutil.parser import parse
 from datetime import datetime
 
-default_template = {
-    "name": "Template",
-    "priority": 2,
-    "tasks": [],
-}
+default_template = {"name": "Template", "priority": 2, "tasks": []}
 
 
 def taskdelta(task):
@@ -28,19 +24,13 @@ def execute_template(filename, api):
         project_id = api.create_project(project_name)
         for task in template["tasks"]:
             if "task" in task:
-                priority = (
-                    task["priority"] if "priority" in task else template["priority"]
-                )
+                priority = task["priority"] if "priority" in task else template["priority"]
                 task_date = due_date + taskdelta(task)
                 if isinstance(task["task"], str):
                     task["task"] = [task["task"]]
                 for name in task["task"]:
                     api.create_task(name, project_id, task_date, priority)
-                    print(
-                        '-> Added new task "{}" with due date {}.'.format(
-                            name, task_date
-                        )
-                    )
+                    print('-> Added new task "{}" with due date {}.'.format(name, task_date))
     except Exception as e:
         print(e)
         exit(1)

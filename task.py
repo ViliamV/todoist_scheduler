@@ -76,11 +76,7 @@ class Task:
                     success = False
                 else:
                     if self._verbose:
-                        print(
-                            '  -> added task "{}" with due date {}'.format(
-                                t, self.due_date
-                            )
-                        )
+                        print('  -> added task "{}" with due date {}'.format(t, self.due_date))
             if success:
                 # incrementing values
                 if interval.days == -1:  # last day of month
@@ -95,5 +91,5 @@ class Task:
 
     @classmethod
     def from_file(cls, filename, api, verbose):
-        loaded = toml.load(str(filename))
+        loaded = toml.load(filename)
         return cls(api, filename, verbose, **loaded)

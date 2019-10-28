@@ -4,6 +4,7 @@ TODO
 launcher.sh
 tasks/*
 todoist_scheduler.conf
+config
 *.mp4
 
 # Byte-compiled / optimized / DLL files

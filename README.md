@@ -1,4 +1,7 @@
-# Todoist Scheduler + Templates
+# Boost for Todoist
+![Todoist Logo](logos/todoist-logo.png)
+*This project is not created by, affiliated with, or supported by Doist*
+
 Is this for you?
 
 If you want to:
@@ -19,20 +22,20 @@ then *YES* you should try it.
 
 1. Clone the repo:
     ```bash
-    git clone https://github.com/ViliamV/todoist_scheduler.git
-    cd todoist_scheduler/
+    git clone https://github.com/ViliamV/todoist-boost
+    cd todoist-boost
     ```
 2. Install the dependencies:
     ```bash
       pip install -r requirements.txt --user
     ```
-3. Run `./todoist_scheduler.py` and follow the instructions
+3. Run `./todoist-boost` and follow the instructions
 
 ## Usage
 ```
-usage: todoist_scheduler.py [-h] [-f FORWARD] [-v] [--template TEMPLATE]
+usage: todoist-boost [-h] [-f FORWARD] [-v] [--template TEMPLATE]
 
-Todoist Scheduler can store future one-time or recurring tasks for Todoist in
+Boost for Todoist can store future one-time or recurring tasks for Todoist in
 plain text and create a task in Todoist when they are needed. Also offers more
 features regarding a set of repeating tasks.
 
@@ -46,7 +49,7 @@ optional arguments:
 ## Creating tasks
 ### Interactive
 You can create tasks using `task_creator.py`.
-They will be stored in directories `tasks`, but you can change it in `todoist_scheduler.conf`.
+They will be stored in directories `tasks`, but you can change it in `config`.
 ### Manual
 Each task is a separate plain text file in [TOML format](https://github.com/toml-lang/toml) that can be easily modified.
 To modify or create a new task, follow these conventions:
@@ -102,7 +105,7 @@ when = +1
 - `when` is delta in days (plus or minus) from the project date and it defaults to 0
 - `task` can be string or an array of strings
 
-You can execute template by running `./todoist_scheduler.py --template example_template.toml --date 2018-09-27`
+You can execute template by running `./todoist-boost --template example_template.toml --date 2018-09-27`
 
 This is the result:
 
@@ -115,18 +118,18 @@ TODO
 ### Bash aliases
 In order to speed up adding a new task, you can create aliases in you `.bashrc` or `.bash_aliases`:
 ```bash_aliases
-alias task='python3 /path/to/todoist_scheduler/task_creator.py'
-alias todoist='python3 /path/to/todoist_scheduler/todoist_scheduler.py'
+alias task='python3 /path/to/todoist-boost/task_creator.py'
+alias todoist='python3 /path/to/todoist-boost/todoist-boost'
 ```
 
 ## Running tasks scheduled for later
 When you will not be able to execute the script for the next `x` days, run:
 ```bash
-    $ ./todoist_scheduler.py -f x
+    $ ./todoist-boost -f x
 ```
 
 ## Motivation
-I made Todoist Scheduler because I wanted more control over my recurring tasks in Todoist.
+I made Boost for Todoist because I wanted more control over my recurring tasks in Todoist.
 I spend some time every week decluttering  - deleting old contacts, archiving emails, organizing files.
 I liked the idea of having a list of tasks and looping over it in Todoist in specified intervals. However, to my knowledge, it is not possible.
 That's why I created this script and liked the clean look of empty Todoist (no recurring tasks that are not needed for 2 months) so I extended the functionality to one-time tasks as well.

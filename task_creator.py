@@ -18,7 +18,7 @@ class TaskType(Enum):
 
 def create_task():
     directory = pathlib.Path(__file__).resolve().parent
-    conf = toml.load(str(directory / "todoist_scheduler.conf"))
+    conf = toml.load(directory / "config")
     print("Logging to Todoist.")
     api = API(pickle.load(open(conf["token"], "rb")))
     if api.valid:
@@ -36,12 +36,8 @@ def create_task():
             print("Your Todoist projects:")
             for i, proj in enumerate(projects):
                 print("{} - {}".format(i, proj))
-            project_number = input(
-                "To which project would you like to add a task? (enter a number): "
-            )
-            while project_number == "" or int(project_number) not in range(
-                len(projects)
-            ):
+            project_number = input("To which project would you like to add a task? (enter a number): ")
+            while project_number == "" or int(project_number) not in range(len(projects)):
                 project_number = input("Project does not exist. Try again. ")
             project_number = int(project_number)
             # Due date
@@ -50,9 +46,7 @@ def create_task():
             task_type = input("[O]ne-time or [R]ecurring task? (default is one-time): ")
             task_type = "o" if task_type == "" else task_type[0].lower()
             while task_type not in "or":
-                task_type = input(
-                    "Wrong input. Input 'o' for one time task or 'r' for recurring task: "
-                )
+                task_type = input("Wrong input. Input 'o' for one time task or 'r' for recurring task: ")
             task_type = TaskType(task_type)
             # Repeat interval
             if task_type == TaskType.RECURRING:
@@ -60,9 +54,7 @@ def create_task():
                     "What should be the repetition interval? (input can be such as '1 day', '2W' or '1 month on the last day'): "
                 )
             # Early
-            early = input(
-                "How early should be task added to Todoist? (defaults to 1 day): "
-            )
+            early = input("How early should be task added to Todoist? (defaults to 1 day): ")
             early = "1 day" if early == "" else early
             # Priority
             priorities = {
@@ -76,9 +68,7 @@ def create_task():
             for key, value in priorities.items():
                 print("{} - {}".format(key, value))
             priority = input("(defaults to normal priority): ")
-            priority = (
-                2 if priority == "" or int(priority) not in range(5) else int(priority)
-            )
+            priority = 2 if priority == "" or int(priority) not in range(5) else int(priority)
             task_plural = "tasks" if len(tasks) > 1 else "task"
             tasks_string = ", ".join(tasks)
             print(
@@ -97,7 +87,9 @@ def create_task():
                 print(" and with interval of repetition {}".format(interval), end="")
             confirmation = input("? (Y/n) ")
             if confirmation == "" or confirmation[0] in "Yy":
-                filename = pathlib.Path(conf["tasks_directory"]) / "{}_{}.toml".format(date.today().isoformat(), tasks[0])
+                filename = pathlib.Path(conf["tasks_directory"]) / "{}_{}.toml".format(
+                    date.today().isoformat(), tasks[0]
+                )
                 task = {
                     "project": projects[project_number],
                     "tasks": tasks,
